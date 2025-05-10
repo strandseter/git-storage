@@ -1,5 +1,5 @@
 {
-  "name": "gitstore-ts",
+  "name": "gitstore",
   "version": "0.1.0",
   "description": "A lightweight TypeScript library to manage and commit data directly to a Git repository, enabling simple, Git-based storage solutions for small websites and static projects.",
   "main": "./dist/index.js",
