@@ -1,10 +1,4 @@
-import type { Adapter, AdapterConfig } from '../types';
-
-export type GithubAdapterConfig = {
-  owner: string;
-  repo: string;
-  token: string;
-};
+import type { Adapter, AdapterConfig, GithubAdapterConfig } from '../types';
 
 type GitHubContentResponse = {
   sha: string;

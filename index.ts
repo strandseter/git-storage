@@ -1,3 +1,5 @@
+export * from './src/types';
+
 import { createClient } from './src/client';
 
 import { GithubAdapter } from './src/adapters/github';
