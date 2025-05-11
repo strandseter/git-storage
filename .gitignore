@@ -2,3 +2,5 @@
 /dist
 /test/tmp
 /test/coverage
+
+.env.test
