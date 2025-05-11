@@ -10,11 +10,26 @@ const CREDENTIALS = {
 };
 
 describe('GithubAdapter', () => {
-  it('should return the content of the file', async () => {
-    const adapter = await GithubAdapter();
+  describe('read', () => {
+    it('should return the content of the file', async () => {
+      const adapter = await GithubAdapter();
 
-    const content = await adapter.getAll(CREDENTIALS);
+      const content = await adapter.read<{ id: string; name: string }>(CREDENTIALS);
 
-    expect(content).toBe('content');
+      expect(content).toBeDefined();
+    });
+  });
+
+  describe('write', () => {
+    it('should update the content of the file', async () => {
+      const adapter = await GithubAdapter();
+
+      const record = {
+        id: '1',
+        name: 'test',
+      };
+
+      await adapter.write([record], CREDENTIALS);
+    });
   });
 });

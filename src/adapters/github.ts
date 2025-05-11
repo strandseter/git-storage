@@ -5,8 +5,14 @@ type GitHubContentResponse = {
   encoding: string;
 };
 
+type GitHubFileResponse = {
+  sha: string;
+  content: string;
+  encoding: string;
+};
+
 export async function GithubAdapter(): Promise<Adapter> {
-  const getAll: Adapter['getAll'] = async <TRecord extends { id: string }>(options: Options) => {
+  const read = async <TRecord extends { id: string }>(options: Options): Promise<TRecord[]> => {
     const { owner, repo, token, filePath } = options;
 
     const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(filePath)}`;
@@ -38,5 +44,42 @@ export async function GithubAdapter(): Promise<Adapter> {
     return parsedContent as TRecord[];
   };
 
-  return { getAll };
+  const write = async <TRecord extends { id: string }>(records: TRecord[], options: Options): Promise<void> => {
+    const { owner, repo, token, filePath } = options;
+
+    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(filePath)}`;
+
+    const getRes = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github.v3+json',
+      },
+    });
+
+    if (!getRes.ok) {
+      throw new Error(`Failed to fetch current file: ${getRes.statusText}`);
+    }
+
+    const currentFile = (await getRes.json()) as GitHubFileResponse;
+    const sha = currentFile.sha;
+
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github.v3+json',
+      },
+      body: JSON.stringify({
+        message: 'gitstore: update',
+        content: Buffer.from(JSON.stringify(records)).toString('base64'),
+        sha,
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to update content: ${res.statusText}`);
+    }
+  };
+
+  return { read, write };
 }

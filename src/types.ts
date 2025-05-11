@@ -6,6 +6,6 @@ export type Options = {
 };
 
 export type Adapter = {
-  getAll: <TRecord extends { id: string }>(options: Options) => Promise<TRecord[]>;
-  //create: <TRecord extends { id: string }>(filePath: string, record: TRecord) => void;
+  read: <TRecord extends { id: string }>(options: Options) => Promise<TRecord[]>;
+  write: <TRecord extends { id: string }>(records: TRecord[], options: Options) => Promise<void>;
 };
