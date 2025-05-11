@@ -1,4 +1,6 @@
-import type { Adapter, Config } from './types';
+import type { Adapter, AdapterConfig } from './types';
+
+type Config = AdapterConfig;
 
 export class GitStorageClient {
   private adapter: Adapter;

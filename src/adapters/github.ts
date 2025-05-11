@@ -1,19 +1,20 @@
-import type { Adapter, Config } from '../types';
+import type { Adapter, AdapterConfig } from '../types';
 
-type GitHubContentResponse = {
-  content: string;
-  encoding: string;
+type GithubAdapterConfig = {
+  owner: string;
+  repo: string;
+  token: string;
 };
 
-type GitHubFileResponse = {
+type GitHubContentResponse = {
   sha: string;
   content: string;
   encoding: string;
 };
 
-export async function GithubAdapter(): Promise<Adapter> {
-  const read = async <TRecord extends { id: string }>(config: Config): Promise<TRecord[]> => {
-    const { owner, repo, token, filePath } = config;
+export async function GithubAdapter(config: GithubAdapterConfig): Promise<Adapter> {
+  const read = async <TRecord extends { id: string }>({ filePath }: AdapterConfig): Promise<TRecord[]> => {
+    const { owner, repo, token } = config;
 
     const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(filePath)}`;
 
@@ -44,8 +45,11 @@ export async function GithubAdapter(): Promise<Adapter> {
     return parsedContent as TRecord[];
   };
 
-  const write = async <TRecord extends { id: string }>(records: TRecord[], config: Config): Promise<void> => {
-    const { owner, repo, token, filePath } = config;
+  const write = async <TRecord extends { id: string }>(
+    records: TRecord[],
+    { filePath }: AdapterConfig,
+  ): Promise<void> => {
+    const { owner, repo, token } = config;
 
     const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(filePath)}`;
 
@@ -60,7 +64,7 @@ export async function GithubAdapter(): Promise<Adapter> {
       throw new Error(`Failed to fetch current file: ${getRes.statusText}`);
     }
 
-    const currentFile = (await getRes.json()) as GitHubFileResponse;
+    const currentFile = (await getRes.json()) as GitHubContentResponse;
     const sha = currentFile.sha;
 
     const res = await fetch(url, {

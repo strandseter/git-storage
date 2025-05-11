@@ -1,11 +1,8 @@
-export type Config = {
-  owner: string;
-  repo: string;
-  token: string;
+export type AdapterConfig = {
   filePath: string;
 };
 
 export type Adapter = {
-  read: <TRecord extends { id: string }>(options: Config) => Promise<TRecord[]>;
-  write: <TRecord extends { id: string }>(records: TRecord[], options: Config) => Promise<void>;
+  read: <TRecord extends { id: string }>(config: AdapterConfig) => Promise<TRecord[]>;
+  write: <TRecord extends { id: string }>(records: TRecord[], config: AdapterConfig) => Promise<void>;
 };
