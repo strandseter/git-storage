@@ -1,6 +1,6 @@
 import type { Adapter, AdapterConfig } from '../types';
 
-type GithubAdapterConfig = {
+export type GithubAdapterConfig = {
   owner: string;
   repo: string;
   token: string;
@@ -12,7 +12,7 @@ type GitHubContentResponse = {
   encoding: string;
 };
 
-export async function GithubAdapter(config: GithubAdapterConfig): Promise<Adapter> {
+export function GithubAdapter(config: GithubAdapterConfig): Adapter {
   const read = async <TRecord extends { id: string }>({ filePath }: AdapterConfig): Promise<TRecord[]> => {
     const { owner, repo, token } = config;
 

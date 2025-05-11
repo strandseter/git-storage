@@ -11,11 +11,9 @@ const AdapterConfig: GithubAdapterConfig = {
 describe('GithubAdapter', () => {
   describe('read', () => {
     it('should return the content of the file', async () => {
-      const adapter = await GithubAdapter(AdapterConfig);
+      const adapter = GithubAdapter(AdapterConfig);
 
-      const content = await adapter.read<{ id: string; name: string }>({
-        filePath: 'src/data/projects.json',
-      });
+      const content = await adapter.read<{ id: string; name: string }>({ filePath: 'src/data/projects.json' });
 
       expect(content).toBeDefined();
     });
@@ -30,9 +28,7 @@ describe('GithubAdapter', () => {
         name: 'test',
       };
 
-      await adapter.write([record], {
-        filePath: 'src/data/projects.json',
-      });
+      await adapter.write([record], { filePath: 'src/data/projects.json' });
     });
   });
 });
