@@ -47,7 +47,9 @@ export function createClient(adapter: Adapter) {
   const delete_ = async (config: Config, id: string): Promise<boolean> => {
     const records = await adapter.read(config);
 
-    if (!(await exists(config, id))) {
+    const exists = records.find((record) => record.id === id);
+
+    if (!exists) {
       throw new Error('Record not found');
     }
 
