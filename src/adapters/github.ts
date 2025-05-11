@@ -1,4 +1,4 @@
-import type { Adapter, Options } from '../types';
+import type { Adapter, Config } from '../types';
 
 type GitHubContentResponse = {
   content: string;
@@ -12,8 +12,8 @@ type GitHubFileResponse = {
 };
 
 export async function GithubAdapter(): Promise<Adapter> {
-  const read = async <TRecord extends { id: string }>(options: Options): Promise<TRecord[]> => {
-    const { owner, repo, token, filePath } = options;
+  const read = async <TRecord extends { id: string }>(config: Config): Promise<TRecord[]> => {
+    const { owner, repo, token, filePath } = config;
 
     const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(filePath)}`;
 
@@ -44,8 +44,8 @@ export async function GithubAdapter(): Promise<Adapter> {
     return parsedContent as TRecord[];
   };
 
-  const write = async <TRecord extends { id: string }>(records: TRecord[], options: Options): Promise<void> => {
-    const { owner, repo, token, filePath } = options;
+  const write = async <TRecord extends { id: string }>(records: TRecord[], config: Config): Promise<void> => {
+    const { owner, repo, token, filePath } = config;
 
     const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(filePath)}`;
 
