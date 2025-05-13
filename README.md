@@ -1,8 +1,8 @@
 # IN DEVELOPMENT!
 
-# GitStore
+# GitStorage
 
-GitStore is a lightweight TypeScript library to manage and commit data directly to a Git repository, enabling simple, Git-based storage solutions for small websites and static projects.
+GitStorage is a lightweight node.js library to manage and commit data directly to a Git repository, enabling simple, Git-based storage solutions for small websites and static projects.
 
 ## Features
 
