@@ -1,0 +1,25 @@
+{
+  "name": "@git-storage/types",
+  "version": "0.1.0",
+  "description": "Types for GitStorage",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/**"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/strandseter/git-storage.git",
+    "directory": "packages/types"
+  },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist && rm -rf node_modules"
+  },
+  "author": "Anders Bjørnstad Strandseter",
+  "license": "MIT"
+}

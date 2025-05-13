@@ -1,9 +1,8 @@
 import path from 'path';
 import { promises as fs } from 'fs';
-import { simpleGit } from 'simple-git';
-import type { SimpleGit } from 'simple-git';
+import { type SimpleGit, simpleGit } from 'simple-git';
 
-import type { Adapter, AdapterConfig } from '../types';
+import type { Adapter, StorageOperationConfig } from '@git-storage/types';
 
 class GitError extends Error {
   constructor(message: string) {
@@ -49,7 +48,7 @@ export function GitAdapter(): Adapter {
     }
   };
 
-  const read = async <TRecord extends { id: string }>({ filePath }: AdapterConfig): Promise<TRecord[]> => {
+  const read = async <TRecord extends { id: string }>({ filePath }: StorageOperationConfig): Promise<TRecord[]> => {
     try {
       const fullPath = path.join(process.cwd(), filePath);
       const content = await fs.readFile(fullPath, 'utf-8');
@@ -64,7 +63,7 @@ export function GitAdapter(): Adapter {
 
   const write = async <TRecord extends { id: string }>(
     records: TRecord[],
-    { filePath }: AdapterConfig,
+    { filePath }: StorageOperationConfig,
   ): Promise<void> => {
     try {
       if (!git) {

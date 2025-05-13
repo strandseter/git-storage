@@ -1,4 +1,4 @@
-import type { Adapter, AdapterConfig, GithubAdapterConfig } from '../types';
+import type { Adapter, StorageOperationConfig } from '@git-storage/types';
 
 type GitHubContentResponse = {
   sha: string;
@@ -6,8 +6,14 @@ type GitHubContentResponse = {
   encoding: string;
 };
 
+export type GithubAdapterConfig = {
+  owner: string;
+  repo: string;
+  token: string;
+};
+
 export function GithubAdapter(config: GithubAdapterConfig): Adapter {
-  const read = async <TRecord extends { id: string }>({ filePath }: AdapterConfig): Promise<TRecord[]> => {
+  const read = async <TRecord extends { id: string }>({ filePath }: StorageOperationConfig): Promise<TRecord[]> => {
     const { owner, repo, token } = config;
 
     const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(filePath)}`;
@@ -41,7 +47,7 @@ export function GithubAdapter(config: GithubAdapterConfig): Adapter {
 
   const write = async <TRecord extends { id: string }>(
     records: TRecord[],
-    { filePath }: AdapterConfig,
+    { filePath }: StorageOperationConfig,
   ): Promise<void> => {
     const { owner, repo, token } = config;
 
