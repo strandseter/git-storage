@@ -1,7 +1,7 @@
 {
-  "name": "@gitstore/core",
+  "name": "@git-storage/client",
   "version": "0.1.0",
-  "description": "Core functionality for GitStorage",
+  "description": "A TypeScript client for GitStorage that provides a simple interface to store and manage data in Git repositories. Features include CRUD operations, type-safe data handling, and flexible storage adapters.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
