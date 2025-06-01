@@ -1,14 +1,18 @@
-import { describe, expect, it, vi, afterEach, beforeAll } from 'vitest';
+import { describe, expect, it, vi, afterEach, beforeAll, afterAll } from 'vitest';
 
 import { GithubAdapter } from '../../../packages/github-adapter/src';
 
 import { type Record, filePaths } from '../_data';
 
-import { setup } from './setup';
+import { cleanup, setup } from './setup';
 import { BaseConfig } from './constants';
 
 beforeAll(async () => {
   await setup();
+});
+
+afterAll(async () => {
+  await cleanup();
 });
 
 afterEach(() => {

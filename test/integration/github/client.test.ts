@@ -11,7 +11,7 @@ describe('getAll', () => {
   it('should return all records', async () => {
     const client = createClient(GithubAdapter(BaseConfig));
 
-    const records = await client.getAll<Record>({ filePath: filePaths.valid });
+    const records = await client.getAll<Record>({ filePath: filePaths.records });
 
     expect(records).toEqual([
       {
