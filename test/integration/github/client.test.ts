@@ -35,6 +35,26 @@ describe('getAll', () => {
   });
 });
 
+describe('getById', () => {
+  it('should return a record by id', async () => {
+    const client = createClient(GithubAdapter(BaseConfig));
+
+    const record = await client.getById<Record>({ filePath: remoteDataFilePaths.records }, '1');
+
+    const [expectedRecord] = await readRecords();
+
+    expect(record).toEqual(expectedRecord);
+  });
+
+  it('should throw an error if the record does not exist', async () => {
+    const client = createClient(GithubAdapter(BaseConfig));
+
+    await expect(client.getById<Record>({ filePath: remoteDataFilePaths.records }, '100')).rejects.toThrow(
+      'Record not found',
+    );
+  });
+});
+
 describe('create', () => {
   it('should create a new record', async () => {
     const client = createClient(GithubAdapter(BaseConfig));
