@@ -1,52 +1,104 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi, afterEach } from 'vitest';
 
 import { GithubAdapter, type GithubAdapterConfig } from '../../../packages/github-adapter/src';
 
-const AdapterConfig: GithubAdapterConfig = {
+const BaseConfig: GithubAdapterConfig = {
   owner: process.env.GITHUB_OWNER!,
   repo: process.env.GITHUB_REPO!,
-  token: process.env.GITHUB_TOKEN!,
+  token: process.env.GITHUB_TOKEN_VALID!,
 };
 
-const adapter = GithubAdapter(AdapterConfig);
+type Record = {
+  id: string;
+  name: string;
+};
+
+const validFilePath = 'data/valid.json';
+const emptyFilePath = 'data/empty.json';
+const invalidFilePath = 'data/invalid.json';
+const objectFilePath = 'data/object.json';
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 describe('read', () => {
-  const filePath = 'data/test.json';
-
   it('should find the file', async () => {
-    const content = await adapter.read<{ id: string; name: string }>({ filePath });
+    const adapter = GithubAdapter(BaseConfig);
+
+    const content = await adapter.read<Record>({ filePath: validFilePath });
+
     expect(content).toBeDefined();
   });
 
   describe('error', () => {
-    it('should throw error when unauthorized', async () => {
-      const adapter = GithubAdapter({
-        ...AdapterConfig,
-        token: 'invalid',
+    describe('github api request', () => {
+      const baseMessage = 'An error occurred while making a request to the GitHub API:';
+
+      it('should throw unauthorized error when invalid token', async () => {
+        const adapter = GithubAdapter({
+          ...BaseConfig,
+          token: 'invalid',
+        });
+
+        const expectedMessage = `${baseMessage} Unauthorized (401)`;
+        await expect(adapter.read<Record>({ filePath: validFilePath })).rejects.toThrow(expectedMessage);
       });
 
-      const message = 'Unathorized to access github repository';
-      await expect(adapter.read<{ id: string; name: string }>({ filePath })).rejects.toThrow(message);
-    });
+      it('should throw unauthorized error when missing token', async () => {
+        const adapter = GithubAdapter({
+          ...BaseConfig,
+          token: undefined as unknown as string,
+        });
 
-    it('should throw an error when the file is not found', async () => {
-      const filePath = 'data/not-found.json';
-
-      const message = 'File not found';
-      await expect(adapter.read<{ id: string; name: string }>({ filePath })).rejects.toThrow(message);
-    });
-
-    it('should throw an error when an unknown error occurs', async () => {
-      const mockFetch = vi.fn().mockResolvedValue({
-        ok: false,
-        status: 500,
-        statusText: 'Internal Server Error',
+        const expectedMessage = `${baseMessage} Unauthorized (401)`;
+        await expect(adapter.read<Record>({ filePath: validFilePath })).rejects.toThrow(expectedMessage);
       });
 
-      vi.stubGlobal('fetch', mockFetch);
+      it('should throw not found error when insufficient permissions assigned to token', async () => {
+        const adapter = GithubAdapter({
+          ...BaseConfig,
+          token: process.env.GITHUB_TOKEN_INSUFFICIENT!,
+        });
 
-      const message = 'An unknown error occurred: Internal Server Error (500)';
-      await expect(adapter.read<{ id: string; name: string }>({ filePath })).rejects.toThrow(message);
+        const expectedMessage = `${baseMessage} Not Found (404)`;
+        await expect(adapter.read<Record>({ filePath: validFilePath })).rejects.toThrow(expectedMessage);
+      });
+
+      it('should throw server error when an github server error occurs', async () => {
+        const adapter = GithubAdapter(BaseConfig);
+        const mockFetch = vi.fn().mockResolvedValue({ ok: false, status: 500, statusText: 'Internal Server Error' });
+
+        vi.stubGlobal('fetch', mockFetch);
+
+        const expectedMessage = `${baseMessage} Internal Server Error (500)`;
+        await expect(adapter.read<Record>({ filePath: validFilePath })).rejects.toThrow(expectedMessage);
+      });
+    });
+
+    describe('response validation', () => {
+      const baseMessage = 'An error occurred while validating the response from the GitHub API:';
+
+      it('should throw error when no content is found', async () => {
+        const adapter = GithubAdapter(BaseConfig);
+
+        const expectedMessage = `${baseMessage} No content found in the response`;
+        await expect(adapter.read<Record>({ filePath: emptyFilePath })).rejects.toThrow(expectedMessage);
+      });
+
+      it('should throw error when content is invalid JSON', async () => {
+        const adapter = GithubAdapter(BaseConfig);
+
+        const expectedMessage = `${baseMessage} Invalid JSON content`;
+        await expect(adapter.read<Record>({ filePath: invalidFilePath })).rejects.toThrow(expectedMessage);
+      });
+
+      it('should throw error when content is not an array', async () => {
+        const adapter = GithubAdapter(BaseConfig);
+
+        const expectedMessage = `${baseMessage} Content is not an array`;
+        await expect(adapter.read<Record>({ filePath: objectFilePath })).rejects.toThrow(expectedMessage);
+      });
     });
   });
 });

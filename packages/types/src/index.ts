@@ -1,5 +1,5 @@
 export type StorageOperationConfig = {
-  filePath: string;
+  filePath: `${string}.json`;
 };
 
 export type Adapter = {

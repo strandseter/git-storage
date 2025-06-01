@@ -14,6 +14,8 @@ export type GithubAdapterConfig = {
 
 export function GithubAdapter(config: GithubAdapterConfig): Adapter {
   const read = async <TRecord extends { id: string }>({ filePath }: StorageOperationConfig): Promise<TRecord[]> => {
+    // TODO: Throw if not .json file
+
     const { owner, repo, token } = config;
 
     const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(filePath)}`;
@@ -26,31 +28,33 @@ export function GithubAdapter(config: GithubAdapterConfig): Adapter {
     });
 
     if (!res.ok) {
-      if (res.status === 401) {
-        throw new GithubAdapterError('Unathorized to access github repository', 'unauthorized');
-      }
-
-      if (res.status === 404) {
-        throw new GithubAdapterError('File not found', 'not-found');
-      }
-
-      throw new GithubAdapterError(`An unknown error occurred: ${res.statusText} (${res.status})`, 'unknown');
+      throw new GithubAdapterRequestError(res);
     }
 
-    const data = (await res.json()) as Partial<GitHubContentResponse>;
+    let data: GitHubContentResponse;
+    try {
+      data = (await res.json()) as GitHubContentResponse;
+    } catch (cause) {
+      throw new GithubAdapterResponseError('Failed to parse response as JSON', res, cause as Error);
+    }
 
     if (!data.content) {
-      throw new Error('No content found in the response');
+      throw new GithubAdapterResponseError('No content found in the response', res);
     }
 
-    if (data.encoding !== 'base64') {
-      throw new Error('Unsupported encoding');
+    let parsedContent: TRecord[];
+    try {
+      const decodedContent = Buffer.from(data.content, 'base64').toString('utf-8');
+      parsedContent = JSON.parse(decodedContent);
+    } catch (cause) {
+      throw new GithubAdapterResponseError('Invalid JSON content', res, cause as Error);
     }
 
-    const decodedContent = Buffer.from(data.content, 'base64').toString('utf-8');
-    const parsedContent = JSON.parse(decodedContent);
+    if (!Array.isArray(parsedContent)) {
+      throw new GithubAdapterResponseError('Content is not an array', res);
+    }
 
-    return parsedContent as TRecord[];
+    return parsedContent;
   };
 
   const write = async <TRecord extends { id: string }>(
@@ -96,12 +100,22 @@ export function GithubAdapter(config: GithubAdapterConfig): Adapter {
   return { read, write };
 }
 
-export class GithubAdapterError extends Error {
-  type: 'unauthorized' | 'not-found' | 'unknown';
-
-  constructor(message: string, type: 'unauthorized' | 'not-found' | 'unknown') {
-    super(message);
+export class GithubAdapterRequestError extends Error {
+  response: Response;
+  constructor(response: Response) {
+    super(`An error occurred while making a request to the GitHub API: ${response.statusText} (${response.status})`);
     this.name = 'GithubAdapterError';
-    this.type = type;
+    this.response = response;
+  }
+}
+
+export class GithubAdapterResponseError extends Error {
+  response: Response;
+  override cause?: Error;
+  constructor(message: string, response: Response, cause?: Error) {
+    super(`An error occurred while validating the response from the GitHub API: ${message}`, { cause });
+    this.name = 'GithubAdapterError';
+    this.cause = cause;
+    this.response = response;
   }
 }
