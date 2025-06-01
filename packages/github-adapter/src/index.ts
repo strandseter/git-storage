@@ -54,6 +54,10 @@ export function GithubAdapter(config: GithubAdapterConfig): Adapter {
       throw new GithubAdapterResponseError('Content is not an array', res);
     }
 
+    if (parsedContent.some((record) => !record.id)) {
+      throw new GithubAdapterResponseError('All records must have an id', res);
+    }
+
     return parsedContent;
   };
 
