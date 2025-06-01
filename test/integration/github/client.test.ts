@@ -3,7 +3,9 @@ import { describe, expect, it } from 'vitest';
 import { GithubAdapter } from '../../../packages/github-adapter/src';
 import { createClient } from '../../../packages/client/src';
 
-import { BaseConfig, type Record, filePaths } from './constants';
+import { type Record, filePaths } from '../_data';
+
+import { BaseConfig } from './constants';
 
 describe('getAll', () => {
   it('should return all records', async () => {
