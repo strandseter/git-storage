@@ -1,36 +1,11 @@
 import { describe, expect, it, vi, afterEach } from 'vitest';
 
-import { GithubAdapter, type GithubAdapterConfig } from '../../../packages/github-adapter/src';
+import { GithubAdapter } from '../../../packages/github-adapter/src';
 
-import { createClient } from '../../../packages/client/src';
-
-const BaseConfig: GithubAdapterConfig = {
-  owner: process.env.GITHUB_OWNER!,
-  repo: process.env.GITHUB_REPO!,
-  token: process.env.GITHUB_TOKEN_VALID!,
-};
-
-type Record = {
-  id: string;
-  name: string;
-};
-
-const validFilePath = 'data/valid.json';
-const validEmptyFilePath = 'data/valid-empty.json';
-
-const invalidEmptyFilePath = 'data/invalid-empty.json';
-const invalidFilePath = 'data/invalid.json';
-const invalidArray = 'data/invalid-array.json';
-const invalidIdFilePath = 'data/invalid-id.json';
+import { type Record, BaseConfig, filePaths } from './constants';
 
 afterEach(() => {
   vi.unstubAllGlobals();
-});
-
-describe('getAll', () => {
-  it('should return all records', async () => {
-    const client = createClient(GithubAdapter(BaseConfig));
-  });
 });
 
 describe('read', () => {
@@ -45,7 +20,7 @@ describe('read', () => {
         });
 
         const expectedMessage = `${baseMessage} Unauthorized (401)`;
-        await expect(adapter.read<Record>({ filePath: validEmptyFilePath })).rejects.toThrow(expectedMessage);
+        await expect(adapter.read<Record>({ filePath: filePaths.validEmpty })).rejects.toThrow(expectedMessage);
       });
 
       it('should throw unauthorized error when missing token', async () => {
@@ -55,7 +30,7 @@ describe('read', () => {
         });
 
         const expectedMessage = `${baseMessage} Unauthorized (401)`;
-        await expect(adapter.read<Record>({ filePath: validEmptyFilePath })).rejects.toThrow(expectedMessage);
+        await expect(adapter.read<Record>({ filePath: filePaths.validEmpty })).rejects.toThrow(expectedMessage);
       });
 
       it('should throw not found error when insufficient permissions assigned to token', async () => {
@@ -65,7 +40,7 @@ describe('read', () => {
         });
 
         const expectedMessage = `${baseMessage} Not Found (404)`;
-        await expect(adapter.read<Record>({ filePath: validEmptyFilePath })).rejects.toThrow(expectedMessage);
+        await expect(adapter.read<Record>({ filePath: filePaths.validEmpty })).rejects.toThrow(expectedMessage);
       });
 
       it('should throw server error when an github server error occurs', async () => {
@@ -75,7 +50,7 @@ describe('read', () => {
         vi.stubGlobal('fetch', mockFetch);
 
         const expectedMessage = `${baseMessage} Internal Server Error (500)`;
-        await expect(adapter.read<Record>({ filePath: validEmptyFilePath })).rejects.toThrow(expectedMessage);
+        await expect(adapter.read<Record>({ filePath: filePaths.validEmpty })).rejects.toThrow(expectedMessage);
       });
     });
 
@@ -86,28 +61,28 @@ describe('read', () => {
         const adapter = GithubAdapter(BaseConfig);
 
         const expectedMessage = `${baseMessage} No content found in the response`;
-        await expect(adapter.read<Record>({ filePath: invalidEmptyFilePath })).rejects.toThrow(expectedMessage);
+        await expect(adapter.read<Record>({ filePath: filePaths.invalidEmpty })).rejects.toThrow(expectedMessage);
       });
 
       it('should throw error when content is invalid JSON', async () => {
         const adapter = GithubAdapter(BaseConfig);
 
         const expectedMessage = `${baseMessage} Invalid JSON content`;
-        await expect(adapter.read<Record>({ filePath: invalidFilePath })).rejects.toThrow(expectedMessage);
+        await expect(adapter.read<Record>({ filePath: filePaths.invalid })).rejects.toThrow(expectedMessage);
       });
 
       it('should throw error when content is not an array', async () => {
         const adapter = GithubAdapter(BaseConfig);
 
         const expectedMessage = `${baseMessage} Content is not an array`;
-        await expect(adapter.read<Record>({ filePath: invalidArray })).rejects.toThrow(expectedMessage);
+        await expect(adapter.read<Record>({ filePath: filePaths.invalidArray })).rejects.toThrow(expectedMessage);
       });
 
       it('should throw error when all records do not have an id', async () => {
         const adapter = GithubAdapter(BaseConfig);
 
         const expectedMessage = `${baseMessage} All records must have an id`;
-        await expect(adapter.read<Record>({ filePath: invalidIdFilePath })).rejects.toThrow(expectedMessage);
+        await expect(adapter.read<Record>({ filePath: filePaths.invalidId })).rejects.toThrow(expectedMessage);
       });
     });
   });
