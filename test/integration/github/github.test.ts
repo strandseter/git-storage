@@ -16,7 +16,7 @@ type Record = {
 const validFilePath = 'data/valid.json';
 const emptyFilePath = 'data/empty.json';
 const invalidFilePath = 'data/invalid.json';
-const objectFilePath = 'data/object.json';
+const invalidArray = 'data/invalid-array.json';
 const invalidIdFilePath = 'data/invalid-id.json';
 
 afterEach(() => {
@@ -98,7 +98,7 @@ describe('read', () => {
         const adapter = GithubAdapter(BaseConfig);
 
         const expectedMessage = `${baseMessage} Content is not an array`;
-        await expect(adapter.read<Record>({ filePath: objectFilePath })).rejects.toThrow(expectedMessage);
+        await expect(adapter.read<Record>({ filePath: invalidArray })).rejects.toThrow(expectedMessage);
       });
 
       it('should throw error when all records do not have an id', async () => {
