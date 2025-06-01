@@ -37,7 +37,8 @@ export async function teardown() {
 }
 
 // TODO: Implement more robust way to handle race conditions.
-const MAX_RETRIES = 3;
+// TODO: Consider using different files for each test to avoid conflicts.
+const MAX_RETRIES = 10;
 const RETRY_DELAY = 1000;
 
 async function sleep(ms: number) {
