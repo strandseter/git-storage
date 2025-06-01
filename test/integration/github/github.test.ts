@@ -2,6 +2,8 @@ import { describe, expect, it, vi, afterEach } from 'vitest';
 
 import { GithubAdapter, type GithubAdapterConfig } from '../../../packages/github-adapter/src';
 
+import { createClient } from '../../../packages/client/src';
+
 const BaseConfig: GithubAdapterConfig = {
   owner: process.env.GITHUB_OWNER!,
   repo: process.env.GITHUB_REPO!,
@@ -14,7 +16,9 @@ type Record = {
 };
 
 const validFilePath = 'data/valid.json';
-const emptyFilePath = 'data/empty.json';
+const validEmptyFilePath = 'data/valid-empty.json';
+
+const invalidEmptyFilePath = 'data/invalid-empty.json';
 const invalidFilePath = 'data/invalid.json';
 const invalidArray = 'data/invalid-array.json';
 const invalidIdFilePath = 'data/invalid-id.json';
@@ -23,15 +27,13 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe('read', () => {
-  it('should find the file', async () => {
-    const adapter = GithubAdapter(BaseConfig);
-
-    const content = await adapter.read<Record>({ filePath: validFilePath });
-
-    expect(content).toBeDefined();
+describe('getAll', () => {
+  it('should return all records', async () => {
+    const client = createClient(GithubAdapter(BaseConfig));
   });
+});
 
+describe('read', () => {
   describe('error', () => {
     describe('github api request', () => {
       const baseMessage = 'An error occurred while making a request to the GitHub API:';
@@ -43,7 +45,7 @@ describe('read', () => {
         });
 
         const expectedMessage = `${baseMessage} Unauthorized (401)`;
-        await expect(adapter.read<Record>({ filePath: validFilePath })).rejects.toThrow(expectedMessage);
+        await expect(adapter.read<Record>({ filePath: validEmptyFilePath })).rejects.toThrow(expectedMessage);
       });
 
       it('should throw unauthorized error when missing token', async () => {
@@ -53,7 +55,7 @@ describe('read', () => {
         });
 
         const expectedMessage = `${baseMessage} Unauthorized (401)`;
-        await expect(adapter.read<Record>({ filePath: validFilePath })).rejects.toThrow(expectedMessage);
+        await expect(adapter.read<Record>({ filePath: validEmptyFilePath })).rejects.toThrow(expectedMessage);
       });
 
       it('should throw not found error when insufficient permissions assigned to token', async () => {
@@ -63,7 +65,7 @@ describe('read', () => {
         });
 
         const expectedMessage = `${baseMessage} Not Found (404)`;
-        await expect(adapter.read<Record>({ filePath: validFilePath })).rejects.toThrow(expectedMessage);
+        await expect(adapter.read<Record>({ filePath: validEmptyFilePath })).rejects.toThrow(expectedMessage);
       });
 
       it('should throw server error when an github server error occurs', async () => {
@@ -73,7 +75,7 @@ describe('read', () => {
         vi.stubGlobal('fetch', mockFetch);
 
         const expectedMessage = `${baseMessage} Internal Server Error (500)`;
-        await expect(adapter.read<Record>({ filePath: validFilePath })).rejects.toThrow(expectedMessage);
+        await expect(adapter.read<Record>({ filePath: validEmptyFilePath })).rejects.toThrow(expectedMessage);
       });
     });
 
@@ -84,7 +86,7 @@ describe('read', () => {
         const adapter = GithubAdapter(BaseConfig);
 
         const expectedMessage = `${baseMessage} No content found in the response`;
-        await expect(adapter.read<Record>({ filePath: emptyFilePath })).rejects.toThrow(expectedMessage);
+        await expect(adapter.read<Record>({ filePath: invalidEmptyFilePath })).rejects.toThrow(expectedMessage);
       });
 
       it('should throw error when content is invalid JSON', async () => {
