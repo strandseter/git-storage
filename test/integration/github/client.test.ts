@@ -8,14 +8,14 @@ import { createClient } from '../../../packages/client/src';
 
 import { type Record, BaseConfig, remoteDataFilePaths } from './constants';
 
-import { setup } from './setup';
+import { setup, teardown } from './helpers';
 
 beforeEach(async () => {
   await setup();
 });
 
 afterAll(async () => {
-  await setup();
+  await teardown();
 });
 
 async function readRecords() {

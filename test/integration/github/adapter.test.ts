@@ -2,7 +2,7 @@ import { describe, expect, it, vi, afterEach, afterAll, beforeEach } from 'vites
 
 import { GithubAdapter } from '../../../packages/github-adapter/src';
 
-import { setup } from './setup';
+import { setup, teardown } from './helpers';
 
 import { type Record, BaseConfig, remoteDataFilePaths } from './constants';
 
@@ -11,7 +11,7 @@ beforeEach(async () => {
 });
 
 afterAll(async () => {
-  await setup();
+  await teardown();
 });
 
 afterEach(() => {

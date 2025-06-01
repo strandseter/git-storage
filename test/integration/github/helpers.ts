@@ -17,7 +17,21 @@ export async function setup() {
   await retryOperation(async () => {
     await adapter.write(JSON.parse(records), {
       filePath: `data/records.json` as `${string}.json`,
-      commitMessage: `setup: records`,
+      commitMessage: `setup`,
+    });
+  });
+}
+
+/**
+ * Teardown the remote test repo by commiting an empty records data file.
+ */
+export async function teardown() {
+  const adapter = GithubAdapter(BaseConfig);
+
+  await retryOperation(async () => {
+    await adapter.write([], {
+      filePath: `data/records.json` as `${string}.json`,
+      commitMessage: `teardown`,
     });
   });
 }
