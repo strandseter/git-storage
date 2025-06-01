@@ -3,15 +3,13 @@ import { describe, expect, it } from 'vitest';
 import { GithubAdapter } from '../../../packages/github-adapter/src';
 import { createClient } from '../../../packages/client/src';
 
-import { type Record, filePaths } from '../_data';
-
-import { BaseConfig } from './constants';
+import { type Record, BaseConfig, remoteDataFilePaths } from './constants';
 
 describe('getAll', () => {
   it('should return all records', async () => {
     const client = createClient(GithubAdapter(BaseConfig));
 
-    const records = await client.getAll<Record>({ filePath: filePaths.records });
+    const records = await client.getAll<Record>({ filePath: remoteDataFilePaths.records });
 
     expect(records).toEqual([
       {

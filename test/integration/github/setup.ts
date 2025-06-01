@@ -5,6 +5,9 @@ import { GithubAdapter } from '../../../packages/github-adapter/src';
 
 import { BaseConfig } from './constants';
 
+/**
+ * Setup the remote test repo by commiting the records data file.
+ */
 export async function setup() {
   const adapter = GithubAdapter(BaseConfig);
 
@@ -17,6 +20,9 @@ export async function setup() {
   });
 }
 
+/**
+ * Cleanup the remote test repo by commiting an empty records data file.
+ */
 export async function cleanup() {
   const adapter = GithubAdapter(BaseConfig);
 
