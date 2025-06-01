@@ -22,20 +22,6 @@ export async function setup() {
   });
 }
 
-/**
- * Cleanup the remote test repo by commiting an empty records data file.
- */
-export async function cleanup() {
-  const adapter = GithubAdapter(BaseConfig);
-
-  await retryOperation(async () => {
-    await adapter.write([], {
-      filePath: `data/records.json` as `${string}.json`,
-      commitMessage: `cleanup: records`,
-    });
-  });
-}
-
 // TODO: Implement more robust way to handle race conditions.
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000;
