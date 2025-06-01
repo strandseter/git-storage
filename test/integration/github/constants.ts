@@ -22,4 +22,4 @@ export const filePaths = {
   invalid: 'data/invalid.json',
   invalidArray: 'data/invalid-array.json',
   invalidId: 'data/invalid-id.json',
-};
+} as const;
