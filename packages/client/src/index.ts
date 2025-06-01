@@ -44,7 +44,9 @@ export function createClient(adapter: Adapter) {
       throw new Error('Record not found');
     }
 
-    await adapter.write([...records, data], config);
+    const updatedRecords = records.map((record) => (record.id === data.id ? data : record));
+
+    await adapter.write(updatedRecords, config);
 
     return data;
   };
