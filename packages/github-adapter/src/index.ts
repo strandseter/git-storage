@@ -26,7 +26,15 @@ export function GithubAdapter(config: GithubAdapterConfig): Adapter {
     });
 
     if (!res.ok) {
-      throw new Error(`Failed to fetch content: ${res.statusText}`);
+      if (res.status === 401) {
+        throw new GithubAdapterError('Unathorized to access github repository', 'unauthorized');
+      }
+
+      if (res.status === 404) {
+        throw new GithubAdapterError('File not found', 'not-found');
+      }
+
+      throw new GithubAdapterError(`An unknown error occurred: ${res.statusText} (${res.status})`, 'unknown');
     }
 
     const data = (await res.json()) as Partial<GitHubContentResponse>;
@@ -86,4 +94,14 @@ export function GithubAdapter(config: GithubAdapterConfig): Adapter {
   };
 
   return { read, write };
+}
+
+export class GithubAdapterError extends Error {
+  type: 'unauthorized' | 'not-found' | 'unknown';
+
+  constructor(message: string, type: 'unauthorized' | 'not-found' | 'unknown') {
+    super(message);
+    this.name = 'GithubAdapterError';
+    this.type = type;
+  }
 }
