@@ -7,9 +7,14 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "pnpm -r build",
-    "clean": "pnpm -r clean",
-    "install": "pnpm -r install"
+    "build:types": "cd packages/types && pnpm build",
+    "build:client": "cd packages/client && pnpm install && pnpm build",
+    "build:github-adapter": "cd packages/github-adapter && pnpm install && pnpm build",
+    "build:git-adapter": "cd packages/git-adapter && pnpm install && pnpm build",
+    "build:all": "pnpm build:types && pnpm build:client && pnpm build:github-adapter && pnpm build:git-adapter",
+    "test:integration": "vitest run test/integration/**/*.test.ts",
+    "clean:all": "pnpm -r clean",
+    "ci": "pnpm clean:all && pnpm build:all && pnpm test:integration"
   },
   "devDependencies": {
     "@eslint/js": "^9.26.0",
