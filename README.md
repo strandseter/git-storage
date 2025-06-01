@@ -2,7 +2,7 @@
 
 # git-storage
 
-This is a lightweight node.js library to manage and commit data directly to a Git repository, enabling simple, Git-based storage solutions for small websites and static projects.
+This is a lightweight Node.js library that enables Git-based data storage by directly managing and committing data to Git repositories. It transforms Git remotes into simple, version-controlled databases, perfect for small websites and static projects.
 
 ## Features
 
@@ -12,4 +12,4 @@ This is a lightweight node.js library to manage and commit data directly to a Gi
 
 ## TODO
 
-- There are conflict issues when running tests find a more robust way to handle race conditions. Consider using different files for each test to avoid conflicts.
+- There are conflict issues when running tests. Find a more robust way to handle race conditions. Consider using different files for each test to avoid conflicts.
