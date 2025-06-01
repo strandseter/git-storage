@@ -63,7 +63,7 @@ export function GitAdapter(): Adapter {
 
   const write = async <TRecord extends { id: string }>(
     records: TRecord[],
-    { filePath }: StorageOperationConfig,
+    { filePath, commitMessage }: StorageOperationConfig,
   ): Promise<void> => {
     try {
       if (!git) {
@@ -78,7 +78,7 @@ export function GitAdapter(): Adapter {
 
       try {
         await git.add(filePath);
-        await git.commit('gitstore: update');
+        await git.commit(commitMessage ?? 'gitstore: update');
 
         let retries = 3;
         while (retries > 0) {

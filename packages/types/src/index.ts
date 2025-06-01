@@ -1,5 +1,6 @@
 export type StorageOperationConfig = {
   filePath: `${string}.json`;
+  commitMessage?: string;
 };
 
 export type Adapter = {

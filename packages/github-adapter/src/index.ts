@@ -63,7 +63,7 @@ export function GithubAdapter(config: GithubAdapterConfig): Adapter {
 
   const write = async <TRecord extends { id: string }>(
     records: TRecord[],
-    { filePath }: StorageOperationConfig,
+    { filePath, commitMessage }: StorageOperationConfig,
   ): Promise<void> => {
     const { owner, repo, token } = config;
 
@@ -90,7 +90,7 @@ export function GithubAdapter(config: GithubAdapterConfig): Adapter {
         Accept: 'application/vnd.github.v3+json',
       },
       body: JSON.stringify({
-        message: 'gitstore: update',
+        message: commitMessage ?? 'gitstore: update',
         content: Buffer.from(JSON.stringify(records)).toString('base64'),
         sha,
       }),
