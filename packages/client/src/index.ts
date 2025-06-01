@@ -10,6 +10,17 @@ export function createClient(adapter: Adapter) {
     return records as TRecord[];
   };
 
+  const getById = async <TRecord extends { id: string }>(config: Config, id: string): Promise<TRecord | null> => {
+    const records = await adapter.read(config);
+    const record = records.find((record) => record.id === id) as TRecord;
+
+    if (!record) {
+      throw new Error('Record not found');
+    }
+
+    return record;
+  };
+
   const create = async <TRecord extends { id: string }>(config: Config, data: TRecord): Promise<TRecord> => {
     const records = await adapter.read(config);
 
@@ -36,14 +47,6 @@ export function createClient(adapter: Adapter) {
     await adapter.write([...records, data], config);
 
     return data;
-  };
-
-  const findById = async <TRecord extends { id: string }>(config: Config, id: string): Promise<TRecord | null> => {
-    const records = await adapter.read(config);
-
-    const record = records.find((record: { id: string }) => record.id === id) as TRecord;
-
-    return record || null;
   };
 
   const delete_ = async (config: Config, id: string): Promise<boolean> => {
@@ -79,9 +82,9 @@ export function createClient(adapter: Adapter) {
 
   return {
     getAll,
+    getById,
     create,
     update,
-    findById,
     delete: delete_,
     exists,
     count,
