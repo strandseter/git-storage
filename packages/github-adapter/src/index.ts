@@ -77,7 +77,7 @@ export function GithubAdapter(config: GithubAdapterConfig): Adapter {
     });
 
     if (!getRes.ok) {
-      throw new Error(`Failed to fetch current file: ${getRes.statusText}`);
+      throw new GithubAdapterRequestError(getRes);
     }
 
     const currentFile = (await getRes.json()) as GitHubContentResponse;
@@ -97,7 +97,11 @@ export function GithubAdapter(config: GithubAdapterConfig): Adapter {
     });
 
     if (!res.ok) {
-      throw new Error(`Failed to update content: ${res.statusText}`);
+      if (res.status === 409) {
+        throw new GithubAdapterRequestError(res);
+      }
+
+      throw new GithubAdapterRequestError(res);
     }
   };
 

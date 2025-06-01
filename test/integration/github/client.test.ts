@@ -1,9 +1,20 @@
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { GithubAdapter } from '../../../packages/github-adapter/src';
 import { createClient } from '../../../packages/client/src';
 
 import { type Record, BaseConfig, remoteDataFilePaths } from './constants';
+import path from 'path';
+import fs from 'fs/promises';
+import { setup, cleanup } from './setup';
+
+beforeAll(async () => {
+  await setup();
+});
+
+afterAll(async () => {
+  await cleanup();
+});
 
 describe('getAll', () => {
   it('should return all records', async () => {
@@ -11,19 +22,12 @@ describe('getAll', () => {
 
     const records = await client.getAll<Record>({ filePath: remoteDataFilePaths.records });
 
-    expect(records).toEqual([
-      {
-        id: '1',
-        name: 'John Doe',
-        some_object: { field: 'some value' },
-        some_array: ['value1', 'value2', 'value3'],
-      },
-      {
-        id: '2',
-        name: 'Jane Doe',
-        some_object: { field: 'some value' },
-        some_array: ['value1'],
-      },
-    ]);
+    const expectedRecords = await fs.readFile(path.join(__dirname, '..', '_data', 'records.json'), 'utf-8');
+
+    expect(records).toEqual(JSON.parse(expectedRecords));
   });
+});
+
+describe('create', () => {
+  it('should create a new record', async () => {});
 });
