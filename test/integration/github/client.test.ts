@@ -49,7 +49,7 @@ describe('getById', () => {
   it('should throw an error if the record does not exist', async () => {
     const client = createClient(GithubAdapter(BaseConfig));
 
-    await expect(client.getById<Record>({ filePath: remoteDataFilePaths.records }, '100')).rejects.toThrow(
+    await expect(client.getById<Record>({ filePath: remoteDataFilePaths.records }, 'not_found')).rejects.toThrow(
       'Record not found',
     );
   });
@@ -115,7 +115,29 @@ describe('update', () => {
     const client = createClient(GithubAdapter(BaseConfig));
 
     await expect(
-      client.update<Record>({ filePath: remoteDataFilePaths.records }, { id: '100' } as Record),
+      client.update<Record>({ filePath: remoteDataFilePaths.records }, { id: 'not_found' } as Record),
     ).rejects.toThrow('Record not found');
+  });
+});
+
+describe('delete', () => {
+  it('should delete a record', async () => {
+    const client = createClient(GithubAdapter(BaseConfig));
+
+    await client.delete({ filePath: remoteDataFilePaths.records }, '1');
+
+    const records = await client.getAll<Record>({ filePath: remoteDataFilePaths.records });
+
+    const expectedRecords = (await readRecords()).filter((record) => record.id !== '1');
+
+    expect(records).toEqual(expectedRecords);
+  });
+
+  it('should throw an error if the record does not exist', async () => {
+    const client = createClient(GithubAdapter(BaseConfig));
+
+    await expect(client.delete({ filePath: remoteDataFilePaths.records }, 'not_found')).rejects.toThrow(
+      'Record not found',
+    );
   });
 });
