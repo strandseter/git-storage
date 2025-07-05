@@ -6,12 +6,15 @@ import { setup, teardown } from './helpers';
 
 import { type Record, BaseConfig, remoteDataFilePaths } from './constants';
 
+const FILE_PATHS: string[] = [];
+
 beforeEach(async () => {
-  await setup();
+  const filePath = await setup();
+  FILE_PATHS.push(filePath);
 });
 
 afterAll(async () => {
-  await teardown();
+  await teardown(FILE_PATHS);
 });
 
 afterEach(() => {

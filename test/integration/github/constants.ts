@@ -26,7 +26,7 @@ export type Record = {
  */
 export const remoteDataFilePaths = {
   // Data file commited to the remote test repo before each integration test run.
-  records: 'data/records.json',
+  records: 'data/records-*.json',
   // Static file paths to test data in the remote test repo.
   validEmpty: 'data/valid-empty.json',
   invalidEmpty: 'data/invalid-empty.json',
