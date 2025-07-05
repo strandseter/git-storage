@@ -10,8 +10,7 @@ import { BaseConfig, type Record } from './constants';
 export async function setupTestFile() {
   const { owner, repo, token } = BaseConfig;
 
-  const testDataDir = path.join(__dirname, '..', '_data');
-  const testData = await fs.readFile(path.join(testDataDir, 'records.json'), 'utf-8');
+  const testData = await readLocalRecords();
 
   const filePath = `data/dynamic/${crypto.randomUUID()}.json` as const;
 
@@ -26,7 +25,7 @@ export async function setupTestFile() {
     },
     body: JSON.stringify({
       message: `setup: ${filePath}`,
-      content: Buffer.from(testData).toString('base64'),
+      content: Buffer.from(JSON.stringify(testData, null, 2)).toString('base64'),
       branch: 'main',
     }),
   });
@@ -78,6 +77,9 @@ export async function cleanupTestFile(filePath: string) {
   }
 }
 
+/**
+ * Read the local records file. Used for testing.
+ */
 export async function readLocalRecords() {
   const records = await fs.readFile(path.join(__dirname, '..', '_data', 'records.json'), 'utf-8');
   return JSON.parse(records) as Record[];
