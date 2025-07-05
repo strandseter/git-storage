@@ -13,7 +13,6 @@
     "build:all": "pnpm build:types && pnpm build:client && pnpm build:github-adapter",
     "test:integration": "vitest run test/integration/**/*.test.ts",
     "clean:all": "pnpm -r clean",
-    "ci": "pnpm clean:all && pnpm build:all && pnpm test:integration",
     "release:types": "cd packages/types && pnpm publish",
     "release:client": "cd packages/client && pnpm publish",
     "release:github-adapter": "cd packages/github-adapter && pnpm publish",
