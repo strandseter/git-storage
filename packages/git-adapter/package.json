@@ -1,7 +1,7 @@
 {
   "name": "@git-storage/github-adapter",
   "version": "0.1.0",
-  "description": "GitHub adapter for GitStorage",
+  "description": "GitHub adapter for git-storage",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
