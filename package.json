@@ -2,7 +2,7 @@
   "name": "git-storage",
   "private": true,
   "version": "0.1.0",
-  "description": "A monorepo for GitStorage packages",
+  "description": "A monorepo for git-storage packages",
   "workspaces": [
     "packages/*"
   ],
