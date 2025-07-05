@@ -1,63 +1,57 @@
-import path from 'path';
-import fs from 'fs/promises';
-
-import { afterAll, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { GithubAdapter } from '../../../packages/github-adapter/src';
 import { createClient } from '../../../packages/client/src';
 
 import { type Record, BaseConfig } from './constants';
 
-import { setup, teardown } from './helpers';
-
-afterAll(async () => {
-  await teardown();
-});
-
-async function readRecords() {
-  const records = await fs.readFile(path.join(__dirname, '..', '_data', 'records.json'), 'utf-8');
-  return JSON.parse(records) as Record[];
-}
+import { cleanupTestFile, readLocalRecords, setupTestFile } from './helpers';
 
 describe('getAll', () => {
   it('should return all records', async () => {
-    const filePath = await setup();
+    const filePath = await setupTestFile();
 
     const client = createClient(GithubAdapter(BaseConfig));
 
     const records = await client.getAll<Record>({ filePath });
 
-    const expectedRecords = await readRecords();
+    const expectedRecords = await readLocalRecords();
 
     expect(records).toEqual(expectedRecords);
+
+    await cleanupTestFile(filePath);
   });
 });
 
 describe('getById', () => {
   it('should return a record by id', async () => {
-    const filePath = await setup();
+    const filePath = await setupTestFile();
 
     const client = createClient(GithubAdapter(BaseConfig));
 
     const record = await client.getById<Record>({ filePath }, '1');
 
-    const [expectedRecord] = await readRecords();
+    const [expectedRecord] = await readLocalRecords();
 
     expect(record).toEqual(expectedRecord);
+
+    await cleanupTestFile(filePath);
   });
 
   it('should throw an error if the record does not exist', async () => {
-    const filePath = await setup();
+    const filePath = await setupTestFile();
 
     const client = createClient(GithubAdapter(BaseConfig));
 
     await expect(client.getById<Record>({ filePath }, 'not_found')).rejects.toThrow('Record not found');
+
+    await cleanupTestFile(filePath);
   });
 });
 
 describe('create', () => {
   it('should create a new record', async () => {
-    const filePath = await setup();
+    const filePath = await setupTestFile();
 
     const client = createClient(GithubAdapter(BaseConfig));
 
@@ -70,15 +64,17 @@ describe('create', () => {
 
     await client.create<Record>({ filePath }, newRecord);
 
-    const expectedRecords = [...(await readRecords()), newRecord];
+    const expectedRecords = [...(await readLocalRecords()), newRecord];
 
     const records = await client.getAll<Record>({ filePath });
 
     expect(records).toEqual(expectedRecords);
+
+    await cleanupTestFile(filePath);
   });
 
   it('should throw an error if the record already exists and not proceed to create the record', async () => {
-    const filePath = await setup();
+    const filePath = await setupTestFile();
 
     const client = createClient(GithubAdapter(BaseConfig));
 
@@ -89,15 +85,17 @@ describe('create', () => {
     );
 
     const records = await client.getAll<Record>({ filePath });
-    const expectedRecords = await readRecords();
+    const expectedRecords = await readLocalRecords();
 
     expect(records).toEqual(expectedRecords);
+
+    await cleanupTestFile(filePath);
   });
 });
 
 describe('update', () => {
   it('should update a record', async () => {
-    const filePath = await setup();
+    const filePath = await setupTestFile();
 
     const client = createClient(GithubAdapter(BaseConfig));
 
@@ -113,24 +111,28 @@ describe('update', () => {
     const [record] = await client.getAll<Record>({ filePath });
 
     expect(record).toEqual(updatedRecord);
+
+    await cleanupTestFile(filePath);
   });
 
   it('should throw an error if the record does not exist', async () => {
-    const filePath = await setup();
+    const filePath = await setupTestFile();
 
     const client = createClient(GithubAdapter(BaseConfig));
 
     await expect(client.update<Record>({ filePath }, { id: 'not_found' } as Record)).rejects.toThrow(
       'Record not found',
     );
+
+    await cleanupTestFile(filePath);
   });
 });
 
 describe('delete', () => {
   it('should delete a record', async () => {
-    const id = '1';
+    const filePath = await setupTestFile();
 
-    const filePath = await setup();
+    const id = '1';
 
     const client = createClient(GithubAdapter(BaseConfig));
 
@@ -138,18 +140,22 @@ describe('delete', () => {
 
     const records = await client.getAll<Record>({ filePath });
 
-    const expectedRecords = (await readRecords()).filter((record) => record.id !== id);
+    const expectedRecords = (await readLocalRecords()).filter((record) => record.id !== id);
 
     expect(records).toEqual(expectedRecords);
+
+    await cleanupTestFile(filePath);
   });
 
   it('should throw an error if the record does not exist', async () => {
-    const id = 'not_found';
+    const filePath = await setupTestFile();
 
-    const filePath = await setup();
+    const id = 'not_found';
 
     const client = createClient(GithubAdapter(BaseConfig));
 
     await expect(client.delete({ filePath }, id)).rejects.toThrow('Record not found');
+
+    await cleanupTestFile(filePath);
   });
 });

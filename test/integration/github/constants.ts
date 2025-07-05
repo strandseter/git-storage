@@ -25,9 +25,9 @@ export type Record = {
  * Static file paths to test data in the remote test repo.
  */
 export const staticRemoteDataFilePaths = {
-  validEmpty: 'data/valid-empty.json',
-  invalidEmpty: 'data/invalid-empty.json',
-  invalid: 'data/invalid.json',
-  invalidArray: 'data/invalid-array.json',
-  invalidId: 'data/invalid-id.json',
+  validEmpty: 'data/static/valid-empty.json',
+  invalidEmpty: 'data/static/invalid-empty.json',
+  invalid: 'data/static/invalid.json',
+  invalidArray: 'data/static/invalid-array.json',
+  invalidId: 'data/static/invalid-id.json',
 } as const;

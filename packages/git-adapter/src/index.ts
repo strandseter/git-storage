@@ -78,7 +78,7 @@ export function GitAdapter(): Adapter {
 
       try {
         await git.add(filePath);
-        await git.commit(commitMessage ?? 'gitstore: update');
+        await git.commit(commitMessage ?? 'git-storage');
 
         let retries = 3;
         while (retries > 0) {

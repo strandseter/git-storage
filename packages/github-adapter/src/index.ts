@@ -90,7 +90,7 @@ export function GithubAdapter(config: GithubAdapterConfig): Adapter {
         Accept: 'application/vnd.github.v3+json',
       },
       body: JSON.stringify({
-        message: commitMessage ?? 'gitstore: update',
+        message: commitMessage ?? 'git-storage',
         content: Buffer.from(JSON.stringify(records)).toString('base64'),
         sha,
       }),

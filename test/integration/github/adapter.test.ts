@@ -1,14 +1,8 @@
-import { describe, expect, it, vi, afterEach, afterAll } from 'vitest';
+import { describe, expect, it, vi, afterEach } from 'vitest';
 
 import { GithubAdapter } from '../../../packages/github-adapter/src';
 
-import { teardown } from './helpers';
-
 import { type Record, BaseConfig, staticRemoteDataFilePaths } from './constants';
-
-afterAll(async () => {
-  await teardown();
-});
 
 afterEach(() => {
   vi.unstubAllGlobals();
