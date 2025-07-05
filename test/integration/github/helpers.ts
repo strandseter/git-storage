@@ -2,8 +2,6 @@ import path from 'path';
 import fs from 'fs/promises';
 import crypto from 'crypto';
 
-import { GithubAdapter } from '../../../packages/github-adapter/src';
-
 import { BaseConfig } from './constants';
 
 /**
@@ -15,7 +13,7 @@ export async function setup() {
   const testDataDir = path.join(__dirname, '..', '_data');
   const testData = await fs.readFile(path.join(testDataDir, 'records.json'), 'utf-8');
 
-  const filePath = `data/records-${crypto.randomUUID()}.json` as const;
+  const filePath = `data/dynamic/records-${crypto.randomUUID()}.json` as const;
 
   const url = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`;
 
@@ -43,13 +41,6 @@ export async function setup() {
 /**
  * Teardown the remote test repo by commiting an empty records data file.
  */
-export async function teardown(filePaths: string[]) {
-  const adapter = GithubAdapter(BaseConfig);
-
-  for (const filePath of filePaths) {
-    await adapter.write([], {
-      filePath: filePath as `${string}.json`,
-      commitMessage: 'teardown',
-    });
-  }
+export async function teardown() {
+  // TODO: Remove all files in a folder
 }

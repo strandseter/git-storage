@@ -1,20 +1,13 @@
-import { describe, expect, it, vi, afterEach, afterAll, beforeEach } from 'vitest';
+import { describe, expect, it, vi, afterEach, afterAll } from 'vitest';
 
 import { GithubAdapter } from '../../../packages/github-adapter/src';
 
-import { setup, teardown } from './helpers';
+import { teardown } from './helpers';
 
-import { type Record, BaseConfig, remoteDataFilePaths } from './constants';
-
-const FILE_PATHS: string[] = [];
-
-beforeEach(async () => {
-  const filePath = await setup();
-  FILE_PATHS.push(filePath);
-});
+import { type Record, BaseConfig, staticRemoteDataFilePaths } from './constants';
 
 afterAll(async () => {
-  await teardown(FILE_PATHS);
+  await teardown();
 });
 
 afterEach(() => {
@@ -33,7 +26,7 @@ describe('read', () => {
         });
 
         const expectedMessage = `${baseMessage} Unauthorized (401)`;
-        await expect(adapter.read<Record>({ filePath: remoteDataFilePaths.validEmpty })).rejects.toThrow(
+        await expect(adapter.read<Record>({ filePath: staticRemoteDataFilePaths.validEmpty })).rejects.toThrow(
           expectedMessage,
         );
       });
@@ -45,7 +38,7 @@ describe('read', () => {
         });
 
         const expectedMessage = `${baseMessage} Unauthorized (401)`;
-        await expect(adapter.read<Record>({ filePath: remoteDataFilePaths.validEmpty })).rejects.toThrow(
+        await expect(adapter.read<Record>({ filePath: staticRemoteDataFilePaths.validEmpty })).rejects.toThrow(
           expectedMessage,
         );
       });
@@ -57,7 +50,7 @@ describe('read', () => {
         });
 
         const expectedMessage = `${baseMessage} Not Found (404)`;
-        await expect(adapter.read<Record>({ filePath: remoteDataFilePaths.validEmpty })).rejects.toThrow(
+        await expect(adapter.read<Record>({ filePath: staticRemoteDataFilePaths.validEmpty })).rejects.toThrow(
           expectedMessage,
         );
       });
@@ -69,7 +62,7 @@ describe('read', () => {
         vi.stubGlobal('fetch', mockFetch);
 
         const expectedMessage = `${baseMessage} Internal Server Error (500)`;
-        await expect(adapter.read<Record>({ filePath: remoteDataFilePaths.validEmpty })).rejects.toThrow(
+        await expect(adapter.read<Record>({ filePath: staticRemoteDataFilePaths.validEmpty })).rejects.toThrow(
           expectedMessage,
         );
       });
@@ -82,7 +75,7 @@ describe('read', () => {
         const adapter = GithubAdapter(BaseConfig);
 
         const expectedMessage = `${baseMessage} No content found in the response`;
-        await expect(adapter.read<Record>({ filePath: remoteDataFilePaths.invalidEmpty })).rejects.toThrow(
+        await expect(adapter.read<Record>({ filePath: staticRemoteDataFilePaths.invalidEmpty })).rejects.toThrow(
           expectedMessage,
         );
       });
@@ -91,14 +84,16 @@ describe('read', () => {
         const adapter = GithubAdapter(BaseConfig);
 
         const expectedMessage = `${baseMessage} Invalid JSON content`;
-        await expect(adapter.read<Record>({ filePath: remoteDataFilePaths.invalid })).rejects.toThrow(expectedMessage);
+        await expect(adapter.read<Record>({ filePath: staticRemoteDataFilePaths.invalid })).rejects.toThrow(
+          expectedMessage,
+        );
       });
 
       it('should throw error when content is not an array', async () => {
         const adapter = GithubAdapter(BaseConfig);
 
         const expectedMessage = `${baseMessage} Content is not an array`;
-        await expect(adapter.read<Record>({ filePath: remoteDataFilePaths.invalidArray })).rejects.toThrow(
+        await expect(adapter.read<Record>({ filePath: staticRemoteDataFilePaths.invalidArray })).rejects.toThrow(
           expectedMessage,
         );
       });
@@ -107,7 +102,7 @@ describe('read', () => {
         const adapter = GithubAdapter(BaseConfig);
 
         const expectedMessage = `${baseMessage} All records must have an id`;
-        await expect(adapter.read<Record>({ filePath: remoteDataFilePaths.invalidId })).rejects.toThrow(
+        await expect(adapter.read<Record>({ filePath: staticRemoteDataFilePaths.invalidId })).rejects.toThrow(
           expectedMessage,
         );
       });
