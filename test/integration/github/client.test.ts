@@ -128,24 +128,28 @@ describe('update', () => {
 
 describe('delete', () => {
   it('should delete a record', async () => {
+    const id = '1';
+
     const filePath = await setup();
 
     const client = createClient(GithubAdapter(BaseConfig));
 
-    await client.delete({ filePath }, '1');
+    await client.delete({ filePath }, id);
 
     const records = await client.getAll<Record>({ filePath });
 
-    const expectedRecords = (await readRecords()).filter((record) => record.id !== '1');
+    const expectedRecords = (await readRecords()).filter((record) => record.id !== id);
 
     expect(records).toEqual(expectedRecords);
   });
 
   it('should throw an error if the record does not exist', async () => {
+    const id = 'not_found';
+
     const filePath = await setup();
 
     const client = createClient(GithubAdapter(BaseConfig));
 
-    await expect(client.delete({ filePath }, 'not_found')).rejects.toThrow('Record not found');
+    await expect(client.delete({ filePath }, id)).rejects.toThrow('Record not found');
   });
 });
