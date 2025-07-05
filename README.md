@@ -2,14 +2,13 @@
 
 # git-storage
 
-This is a lightweight Node.js library that enables Git-based data storage by directly managing and committing data to Git repositories. It transforms Git remotes into simple, version-controlled databases, perfect for small websites and static projects.
+A lightweight Node.js library that enables Git-based data storage by directly managing and committing data to Git repositories. It transforms Git remotes into simple, version-controlled databases, perfect for small websites and static projects.
 
 ## Features
 
-- Simple API for storing and committing data
-- Automatically commits changes to a Git repository
-- Supports TypeScript and JavaScript
-
-## TODO
-
-- There are conflict issues when running tests. Find a more robust way to handle race conditions. Consider using different files for each test to avoid conflicts.
+- **Git as Database** - Transform any Git repository into a version-controlled database
+- **Multiple Adapters** - Support for local GitHub repositories (bitbucket, gitlab, etc. coming soon)
+- **TypeScript First** - Full TypeScript support with type-safe operations
+- **CRUD Operations** - Create, read, update, delete, count, and exists operations
+- **Automatic Commits** - Changes are automatically committed and pushed to remote
+- **JSON Storage** - Simple JSON-based data storage with ID-based records
