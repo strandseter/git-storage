@@ -8,6 +8,12 @@ type JsonAdapter = {
   write: <TRecord extends { id: string }>(records: TRecord[], config: StorageOperationConfig) => Promise<void>;
 };
 
+type FileAdapter = {
+  read: <TContent>(config: StorageOperationConfig) => Promise<TContent>;
+  write: <TContent>(content: TContent, config: StorageOperationConfig) => Promise<void>;
+};
+
 export type Adapter = {
   json: JsonAdapter;
+  file: FileAdapter;
 };
