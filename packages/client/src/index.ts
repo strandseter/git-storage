@@ -6,12 +6,12 @@ type Config = StorageOperationConfig;
 
 export function createClient(adapter: Adapter) {
   const getAll = async <TRecord extends { id: string }>(config: Config): Promise<TRecord[]> => {
-    const records = await adapter.read(config);
+    const records = await adapter.json.read(config);
     return records as TRecord[];
   };
 
   const getById = async <TRecord extends { id: string }>(config: Config, id: string): Promise<TRecord | null> => {
-    const records = await adapter.read(config);
+    const records = await adapter.json.read(config);
     const record = records.find((record) => record.id === id) as TRecord;
 
     if (!record) {
@@ -22,7 +22,7 @@ export function createClient(adapter: Adapter) {
   };
 
   const create = async <TRecord extends { id: string }>(config: Config, data: TRecord): Promise<TRecord> => {
-    const records = await adapter.read(config);
+    const records = await adapter.json.read(config);
 
     const exists = records.find((record) => record.id === data.id);
 
@@ -30,13 +30,13 @@ export function createClient(adapter: Adapter) {
       throw new Error('Record already exists');
     }
 
-    await adapter.write([...records, data], config);
+    await adapter.json.write([...records, data], config);
 
     return data;
   };
 
   const update = async <TRecord extends { id: string }>(config: Config, data: TRecord): Promise<TRecord> => {
-    const records = await adapter.read({ ...config });
+    const records = await adapter.json.read({ ...config });
 
     const exists = records.find((record: { id: string }) => record.id === data.id);
 
@@ -46,13 +46,13 @@ export function createClient(adapter: Adapter) {
 
     const updatedRecords = records.map((record) => (record.id === data.id ? data : record));
 
-    await adapter.write(updatedRecords, config);
+    await adapter.json.write(updatedRecords, config);
 
     return data;
   };
 
   const delete_ = async (config: Config, id: string): Promise<boolean> => {
-    const records = await adapter.read(config);
+    const records = await adapter.json.read(config);
 
     const exists = records.find((record: { id: string }) => record.id === id);
 
@@ -62,13 +62,13 @@ export function createClient(adapter: Adapter) {
 
     const deleted = records.filter((record: { id: string }) => record.id !== id);
 
-    await adapter.write(deleted, config);
+    await adapter.json.write(deleted, config);
 
     return true;
   };
 
   const exists = async (config: Config, id: string): Promise<boolean> => {
-    const records = await adapter.read(config);
+    const records = await adapter.json.read(config);
 
     const record = records.find((record: { id: string }) => record.id === id);
 
@@ -78,7 +78,7 @@ export function createClient(adapter: Adapter) {
   };
 
   const count = async (config: Config): Promise<number> => {
-    const records = await adapter.read(config);
+    const records = await adapter.json.read(config);
     return records.length;
   };
 

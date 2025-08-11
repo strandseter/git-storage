@@ -3,7 +3,11 @@ export type StorageOperationConfig = {
   commitMessage?: string;
 };
 
-export type Adapter = {
+type JsonAdapter = {
   read: <TRecord extends { id: string }>(config: StorageOperationConfig) => Promise<TRecord[]>;
   write: <TRecord extends { id: string }>(records: TRecord[], config: StorageOperationConfig) => Promise<void>;
+};
+
+export type Adapter = {
+  json: JsonAdapter;
 };

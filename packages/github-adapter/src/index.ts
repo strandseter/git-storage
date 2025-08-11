@@ -105,7 +105,7 @@ export function GithubAdapter(config: GithubAdapterConfig): Adapter {
     }
   };
 
-  return { read, write };
+  return { json: { read, write } };
 }
 
 export class GithubAdapterRequestError extends Error {
