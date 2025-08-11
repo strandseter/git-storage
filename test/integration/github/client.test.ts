@@ -202,17 +202,23 @@ describe('file', () => {
     });
 
     it('should throw when writing to an existing path', async () => {
-      const filePath = `data/dynamic/${crypto.randomUUID()}.json` as const;
+      const filePath = `data/dynamic/${crypto.randomUUID()}.jpg` as const;
 
       const adapter = GithubAdapter(BaseConfig);
 
       const imagePath = path.join(__dirname, '..', '_images', 'cat.jpg');
       const imageBuffer = await fs.readFile(imagePath);
 
-      await adapter.file.write(imageBuffer, { filePath, commitMessage: 'test: write first (image bytes)' });
+      await adapter.file.write(imageBuffer, {
+        filePath: filePath as `${string}.json`, // TODO: Fix this
+        commitMessage: 'test: write first (image bytes)',
+      });
 
       await expect(
-        adapter.file.write(imageBuffer, { filePath, commitMessage: 'test: write duplicate (image bytes)' }),
+        adapter.file.write(imageBuffer, {
+          filePath: filePath as `${string}.json`, // TODO: Fix this
+          commitMessage: 'test: write duplicate (image bytes)',
+        }),
       ).rejects.toThrow('File already exists');
 
       await cleanupTestFile(filePath);
