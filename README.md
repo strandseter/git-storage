@@ -4,6 +4,12 @@
 
 A lightweight Node.js library that enables Git-based data storage by directly managing and committing data to Git repositories. It transforms Git remotes into simple, version-controlled databases, perfect for small websites and static projects.
 
+## Why use this
+
+- **No database or servers** - Content and files live in Git with full version history.
+- **Serverless-ready** - Ideal for static sites on Vercel/Netlify/Cloudflare—Git pushes trigger rebuilds, no backend to run.
+- **CMS-friendly** - Plug in lightweight admin UIs so editors update content; changes commit to the repo as the single source of truth.
+
 ## Features
 
 - **Git as Database** - Transform any Git repository into a version-controlled database
@@ -13,12 +19,6 @@ A lightweight Node.js library that enables Git-based data storage by directly ma
 - **Automatic Commits** - Changes are automatically committed and pushed to remote
 - **Records Storage** - Simple JSON-based data storage with ID-based records
 - **Files Storage** - Simple file storage with commit messages
-
-## Why use this
-
-- **No database or servers**: Content and files live in Git with full version history.
-- **Serverless-ready**: Ideal for static sites on Vercel/Netlify/Cloudflare—Git pushes trigger rebuilds, no backend to run.
-- **CMS-friendly**: Plug in lightweight admin UIs so editors update content; changes commit to the repo as the single source of truth.
 
 ## Warning
 
