@@ -1,4 +1,4 @@
-import type { Adapter, StorageOperationConfig, FileStorageOperationConfig } from '@git-storage/types';
+import type { Adapter, RecordsOperationConfig, FilesOperationConfig } from '@git-storage/types';
 
 type GitHubContentResponse = {
   sha: string;
@@ -12,8 +12,8 @@ export type GithubAdapterConfig = {
   token: string;
 };
 
-function jsonAdapter(config: GithubAdapterConfig): Adapter['json'] {
-  const read = async <TRecord extends { id: string }>({ filePath }: StorageOperationConfig): Promise<TRecord[]> => {
+function recordsAdapter(config: GithubAdapterConfig): Adapter['records'] {
+  const read = async <TRecord extends { id: string }>({ filePath }: RecordsOperationConfig): Promise<TRecord[]> => {
     // TODO: Throw if not .json file
 
     const { owner, repo, token } = config;
@@ -63,7 +63,7 @@ function jsonAdapter(config: GithubAdapterConfig): Adapter['json'] {
 
   const write = async <TRecord extends { id: string }>(
     records: TRecord[],
-    { filePath, commitMessage }: StorageOperationConfig,
+    { filePath, commitMessage }: RecordsOperationConfig,
   ): Promise<void> => {
     const { owner, repo, token } = config;
 
@@ -108,10 +108,10 @@ function jsonAdapter(config: GithubAdapterConfig): Adapter['json'] {
   return { read, write };
 }
 
-function fileAdapter(config: GithubAdapterConfig): Adapter['file'] {
+function filesAdapter(config: GithubAdapterConfig): Adapter['files'] {
   const write = async <TContent>(
     content: TContent,
-    { filePath, commitMessage }: FileStorageOperationConfig,
+    { filePath, commitMessage }: FilesOperationConfig,
   ): Promise<void> => {
     const { owner, repo, token } = config;
 
@@ -170,7 +170,7 @@ function fileAdapter(config: GithubAdapterConfig): Adapter['file'] {
     throw new Error('Not implemented');
   };
 
-  const del = async ({ filePath, commitMessage }: FileStorageOperationConfig): Promise<void> => {
+  const del = async ({ filePath, commitMessage }: FilesOperationConfig): Promise<void> => {
     const { owner, repo, token } = config;
 
     const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(filePath)}`;
@@ -213,7 +213,7 @@ function fileAdapter(config: GithubAdapterConfig): Adapter['file'] {
 }
 
 export function GithubAdapter(config: GithubAdapterConfig): Adapter {
-  return { json: jsonAdapter(config), file: fileAdapter(config) };
+  return { records: recordsAdapter(config), files: filesAdapter(config) };
 }
 
 export class GithubAdapterRequestError extends Error {

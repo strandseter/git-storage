@@ -1,104 +1,103 @@
-import type { Adapter, StorageOperationConfig, FileStorageOperationConfig } from '@git-storage/types';
+import type { Adapter, RecordsOperationConfig, FilesOperationConfig } from '@git-storage/types';
 
-export * from '@git-storage/types';
-
-type Config = StorageOperationConfig;
+// Note: Intentionally not re-exporting adapter-level types to avoid exposing
+// internal details. Consumers should use the high-level client API only.
+export type RecordsReadConfig = Omit<RecordsOperationConfig, 'commitMessage'>;
+export type RecordsWriteConfig = RecordsOperationConfig;
+export type FilesReadConfig = Omit<FilesOperationConfig, 'commitMessage'>;
+export type FilesWriteConfig = FilesOperationConfig;
 
 export function createClient(adapter: Adapter) {
-  const getAll = async <TRecord extends { id: string }>(config: Config): Promise<TRecord[]> => {
-    const records = await adapter.json.read(config);
-    return records as TRecord[];
-  };
+  const records = {
+    getAll: async <TRecord extends { id: string }>(config: RecordsReadConfig): Promise<TRecord[]> => {
+      const records = (await adapter.records.read(config)) as TRecord[];
 
-  const getById = async <TRecord extends { id: string }>(config: Config, id: string): Promise<TRecord | null> => {
-    const records = await adapter.json.read(config);
-    const record = records.find((record) => record.id === id) as TRecord;
+      return records;
+    },
 
-    if (!record) {
-      throw new Error('Record not found');
-    }
+    getById: async <TRecord extends { id: string }>(config: RecordsReadConfig, id: string): Promise<TRecord> => {
+      const records = (await adapter.records.read(config)) as TRecord[];
 
-    return record;
-  };
+      const record = records.find((r) => r.id === id);
 
-  const create = async <TRecord extends { id: string }>(config: Config, data: TRecord): Promise<TRecord> => {
-    const records = await adapter.json.read(config);
+      if (!record) {
+        throw new Error('Record not found');
+      }
 
-    const exists = records.find((record) => record.id === data.id);
+      return record as TRecord;
+    },
 
-    if (exists) {
-      throw new Error('Record already exists');
-    }
+    create: async <TRecord extends { id: string }>(config: RecordsWriteConfig, data: TRecord): Promise<TRecord> => {
+      const records = (await adapter.records.read(config)) as TRecord[];
 
-    await adapter.json.write([...records, data], config);
+      const exists = records.find((r) => r.id === data.id);
 
-    return data;
-  };
+      if (exists) {
+        throw new Error('Record already exists');
+      }
 
-  const update = async <TRecord extends { id: string }>(config: Config, data: TRecord): Promise<TRecord> => {
-    const records = await adapter.json.read({ ...config });
+      await adapter.records.write([...records, data], config);
 
-    const exists = records.find((record: { id: string }) => record.id === data.id);
+      return data;
+    },
 
-    if (!exists) {
-      throw new Error('Record not found');
-    }
+    update: async <TRecord extends { id: string }>(config: RecordsWriteConfig, data: TRecord): Promise<TRecord> => {
+      const records = (await adapter.records.read(config)) as TRecord[];
 
-    const updatedRecords = records.map((record) => (record.id === data.id ? data : record));
+      const exists = records.find((r) => r.id === data.id);
 
-    await adapter.json.write(updatedRecords, config);
+      if (!exists) {
+        throw new Error('Record not found');
+      }
 
-    return data;
-  };
+      const updated = records.map((r) => (r.id === data.id ? data : r));
 
-  const delete_ = async (config: Config, id: string): Promise<boolean> => {
-    const records = await adapter.json.read(config);
+      await adapter.records.write(updated, config);
 
-    const exists = records.find((record: { id: string }) => record.id === id);
+      return data;
+    },
 
-    if (!exists) {
-      throw new Error('Record not found');
-    }
+    delete: async (config: RecordsWriteConfig, id: string): Promise<boolean> => {
+      const records = await adapter.records.read(config);
 
-    const deleted = records.filter((record: { id: string }) => record.id !== id);
+      const exists = records.find((r: { id: string }) => r.id === id);
 
-    await adapter.json.write(deleted, config);
+      if (!exists) {
+        throw new Error('Record not found');
+      }
 
-    return true;
-  };
+      const deleted = records.filter((r: { id: string }) => r.id !== id);
 
-  const exists = async (config: Config, id: string): Promise<boolean> => {
-    const records = await adapter.json.read(config);
+      await adapter.records.write(deleted, config);
 
-    const record = records.find((record: { id: string }) => record.id === id);
+      return true;
+    },
 
-    const exists = record !== undefined;
+    exists: async (config: RecordsReadConfig, id: string): Promise<boolean> => {
+      const records = await adapter.records.read(config);
 
-    return exists;
-  };
+      return records.some((r: { id: string }) => r.id === id);
+    },
 
-  const count = async (config: Config): Promise<number> => {
-    const records = await adapter.json.read(config);
-    return records.length;
-  };
+    count: async (config: RecordsReadConfig): Promise<number> => {
+      const records = await adapter.records.read(config);
 
-  const writeFile = async <TContent>(config: FileStorageOperationConfig, content: TContent): Promise<void> => {
-    await adapter.file.write(content, config);
-  };
+      return records.length;
+    },
+  } as const;
 
-  const deleteFile = async (config: FileStorageOperationConfig): Promise<void> => {
-    await adapter.file.delete(config);
-  };
+  const files = {
+    write: async <TContent>(config: FilesWriteConfig, content: TContent): Promise<void> => {
+      await adapter.files.write(content, config);
+    },
+
+    delete: async (config: FilesWriteConfig): Promise<void> => {
+      await adapter.files.delete(config);
+    },
+  } as const;
 
   return {
-    getAll,
-    getById,
-    create,
-    update,
-    delete: delete_,
-    exists,
-    count,
-    writeFile,
-    deleteFile,
+    records,
+    files,
   };
 }

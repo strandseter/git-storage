@@ -7,98 +7,99 @@ import { type Record, BaseConfig, staticRemoteDataFilePaths } from './constants'
 afterEach(() => {
   vi.unstubAllGlobals();
 });
+describe('records', () => {
+  describe('read', () => {
+    describe('error', () => {
+      describe('github api request', () => {
+        const baseMessage = 'An error occurred while making a request to the GitHub API:';
 
-describe('read', () => {
-  describe('error', () => {
-    describe('github api request', () => {
-      const baseMessage = 'An error occurred while making a request to the GitHub API:';
+        it('should throw unauthorized error when invalid token', async () => {
+          const adapter = GithubAdapter({
+            ...BaseConfig,
+            token: 'invalid',
+          });
 
-      it('should throw unauthorized error when invalid token', async () => {
-        const adapter = GithubAdapter({
-          ...BaseConfig,
-          token: 'invalid',
+          const expectedMessage = `${baseMessage} Unauthorized (401)`;
+          await expect(
+            adapter.records.read<Record>({ filePath: staticRemoteDataFilePaths.validEmpty }),
+          ).rejects.toThrow(expectedMessage);
         });
 
-        const expectedMessage = `${baseMessage} Unauthorized (401)`;
-        await expect(adapter.json.read<Record>({ filePath: staticRemoteDataFilePaths.validEmpty })).rejects.toThrow(
-          expectedMessage,
-        );
-      });
+        it('should throw unauthorized error when missing token', async () => {
+          const adapter = GithubAdapter({
+            ...BaseConfig,
+            token: undefined as unknown as string,
+          });
 
-      it('should throw unauthorized error when missing token', async () => {
-        const adapter = GithubAdapter({
-          ...BaseConfig,
-          token: undefined as unknown as string,
+          const expectedMessage = `${baseMessage} Unauthorized (401)`;
+          await expect(
+            adapter.records.read<Record>({ filePath: staticRemoteDataFilePaths.validEmpty }),
+          ).rejects.toThrow(expectedMessage);
         });
 
-        const expectedMessage = `${baseMessage} Unauthorized (401)`;
-        await expect(adapter.json.read<Record>({ filePath: staticRemoteDataFilePaths.validEmpty })).rejects.toThrow(
-          expectedMessage,
-        );
-      });
+        it('should throw not found error when insufficient permissions assigned to token', async () => {
+          const adapter = GithubAdapter({
+            ...BaseConfig,
+            token: process.env.GITHUB_TOKEN_INSUFFICIENT!,
+          });
 
-      it('should throw not found error when insufficient permissions assigned to token', async () => {
-        const adapter = GithubAdapter({
-          ...BaseConfig,
-          token: process.env.GITHUB_TOKEN_INSUFFICIENT!,
+          const expectedMessage = `${baseMessage} Not Found (404)`;
+          await expect(
+            adapter.records.read<Record>({ filePath: staticRemoteDataFilePaths.validEmpty }),
+          ).rejects.toThrow(expectedMessage);
         });
 
-        const expectedMessage = `${baseMessage} Not Found (404)`;
-        await expect(adapter.json.read<Record>({ filePath: staticRemoteDataFilePaths.validEmpty })).rejects.toThrow(
-          expectedMessage,
-        );
+        it('should throw server error when an github server error occurs', async () => {
+          const adapter = GithubAdapter(BaseConfig);
+          const mockFetch = vi.fn().mockResolvedValue({ ok: false, status: 500, statusText: 'Internal Server Error' });
+
+          vi.stubGlobal('fetch', mockFetch);
+
+          const expectedMessage = `${baseMessage} Internal Server Error (500)`;
+          await expect(
+            adapter.records.read<Record>({ filePath: staticRemoteDataFilePaths.validEmpty }),
+          ).rejects.toThrow(expectedMessage);
+        });
       });
 
-      it('should throw server error when an github server error occurs', async () => {
-        const adapter = GithubAdapter(BaseConfig);
-        const mockFetch = vi.fn().mockResolvedValue({ ok: false, status: 500, statusText: 'Internal Server Error' });
+      describe('response validation', () => {
+        const baseMessage = 'An error occurred while validating the response from the GitHub API:';
 
-        vi.stubGlobal('fetch', mockFetch);
+        it('should throw error when no content is found', async () => {
+          const adapter = GithubAdapter(BaseConfig);
 
-        const expectedMessage = `${baseMessage} Internal Server Error (500)`;
-        await expect(adapter.json.read<Record>({ filePath: staticRemoteDataFilePaths.validEmpty })).rejects.toThrow(
-          expectedMessage,
-        );
-      });
-    });
+          const expectedMessage = `${baseMessage} No content found in the response`;
+          await expect(
+            adapter.records.read<Record>({ filePath: staticRemoteDataFilePaths.invalidEmpty }),
+          ).rejects.toThrow(expectedMessage);
+        });
 
-    describe('response validation', () => {
-      const baseMessage = 'An error occurred while validating the response from the GitHub API:';
+        it('should throw error when content is invalid JSON', async () => {
+          const adapter = GithubAdapter(BaseConfig);
 
-      it('should throw error when no content is found', async () => {
-        const adapter = GithubAdapter(BaseConfig);
+          const expectedMessage = `${baseMessage} Invalid JSON content`;
+          await expect(adapter.records.read<Record>({ filePath: staticRemoteDataFilePaths.invalid })).rejects.toThrow(
+            expectedMessage,
+          );
+        });
 
-        const expectedMessage = `${baseMessage} No content found in the response`;
-        await expect(adapter.json.read<Record>({ filePath: staticRemoteDataFilePaths.invalidEmpty })).rejects.toThrow(
-          expectedMessage,
-        );
-      });
+        it('should throw error when content is not an array', async () => {
+          const adapter = GithubAdapter(BaseConfig);
 
-      it('should throw error when content is invalid JSON', async () => {
-        const adapter = GithubAdapter(BaseConfig);
+          const expectedMessage = `${baseMessage} Content is not an array`;
+          await expect(
+            adapter.records.read<Record>({ filePath: staticRemoteDataFilePaths.invalidArray }),
+          ).rejects.toThrow(expectedMessage);
+        });
 
-        const expectedMessage = `${baseMessage} Invalid JSON content`;
-        await expect(adapter.json.read<Record>({ filePath: staticRemoteDataFilePaths.invalid })).rejects.toThrow(
-          expectedMessage,
-        );
-      });
+        it('should throw error when all records do not have an id', async () => {
+          const adapter = GithubAdapter(BaseConfig);
 
-      it('should throw error when content is not an array', async () => {
-        const adapter = GithubAdapter(BaseConfig);
-
-        const expectedMessage = `${baseMessage} Content is not an array`;
-        await expect(adapter.json.read<Record>({ filePath: staticRemoteDataFilePaths.invalidArray })).rejects.toThrow(
-          expectedMessage,
-        );
-      });
-
-      it('should throw error when all records do not have an id', async () => {
-        const adapter = GithubAdapter(BaseConfig);
-
-        const expectedMessage = `${baseMessage} All records must have an id`;
-        await expect(adapter.json.read<Record>({ filePath: staticRemoteDataFilePaths.invalidId })).rejects.toThrow(
-          expectedMessage,
-        );
+          const expectedMessage = `${baseMessage} All records must have an id`;
+          await expect(adapter.records.read<Record>({ filePath: staticRemoteDataFilePaths.invalidId })).rejects.toThrow(
+            expectedMessage,
+          );
+        });
       });
     });
   });

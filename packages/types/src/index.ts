@@ -1,25 +1,25 @@
-export type StorageOperationConfig = {
+export type RecordsOperationConfig = {
   filePath: `${string}.json`;
   commitMessage?: string;
 };
 
-export type FileStorageOperationConfig = {
+export type FilesOperationConfig = {
   filePath: string;
   commitMessage?: string;
 };
 
-type JsonAdapter = {
-  read: <TRecord extends { id: string }>(config: StorageOperationConfig) => Promise<TRecord[]>;
-  write: <TRecord extends { id: string }>(records: TRecord[], config: StorageOperationConfig) => Promise<void>;
+type RecordsAdapter = {
+  read: <TRecord extends { id: string }>(config: RecordsOperationConfig) => Promise<TRecord[]>;
+  write: <TRecord extends { id: string }>(records: TRecord[], config: RecordsOperationConfig) => Promise<void>;
 };
 
 type FileAdapter = {
-  read: <TContent>(config: FileStorageOperationConfig) => Promise<TContent>;
-  write: <TContent>(content: TContent, config: FileStorageOperationConfig) => Promise<void>;
-  delete: (config: FileStorageOperationConfig) => Promise<void>;
+  read: <TContent>(config: FilesOperationConfig) => Promise<TContent>;
+  write: <TContent>(content: TContent, config: FilesOperationConfig) => Promise<void>;
+  delete: (config: FilesOperationConfig) => Promise<void>;
 };
 
 export type Adapter = {
-  json: JsonAdapter;
-  file: FileAdapter;
+  records: RecordsAdapter;
+  files: FileAdapter;
 };
