@@ -16,11 +16,9 @@ A lightweight Node.js library that enables Git-based data storage by directly ma
 
 ## Why use this
 
-- **No database to host**: Data lives in your Git repository as JSON records and files with full version history.
-- **Serverless-friendly**: Works great on platforms like Vercel, Netlify, or Cloudflare Pages—deploy static HTML and rebuild on each Git push.
-- **Zero backend maintenance**: No long‑running servers. Changes are committed to Git and can trigger rebuilds via webhooks/CI.
-- **Content-driven rebuilds**: Sites can regenerate based on updated Git records and files, keeping content in sync with the repo.
-- **CMS-friendly editing**: Hook up lightweight CMS/admin UIs so non‑technical editors can update content themselves. Edits are committed to the repo, trigger rebuilds, require no separate database, and keep the repo as the single source of truth.
+- **No database or servers**: Content and files live in Git with full version history.
+- **Serverless-ready**: Ideal for static sites on Vercel/Netlify/Cloudflare—Git pushes trigger rebuilds, no backend to run.
+- **CMS-friendly**: Plug in lightweight admin UIs so editors update content; changes commit to the repo as the single source of truth.
 
 ## Warning
 
