@@ -1,4 +1,4 @@
-import type { Adapter, StorageOperationConfig } from '@git-storage/types';
+import type { Adapter, StorageOperationConfig, FileStorageOperationConfig } from '@git-storage/types';
 
 type GitHubContentResponse = {
   sha: string;
@@ -111,7 +111,7 @@ function jsonAdapter(config: GithubAdapterConfig): Adapter['json'] {
 function fileAdapter(config: GithubAdapterConfig): Adapter['file'] {
   const write = async <TContent>(
     content: TContent,
-    { filePath, commitMessage }: StorageOperationConfig,
+    { filePath, commitMessage }: FileStorageOperationConfig,
   ): Promise<void> => {
     const { owner, repo, token } = config;
 
@@ -170,7 +170,46 @@ function fileAdapter(config: GithubAdapterConfig): Adapter['file'] {
     throw new Error('Not implemented');
   };
 
-  return { read, write };
+  const del = async ({ filePath, commitMessage }: FileStorageOperationConfig): Promise<void> => {
+    const { owner, repo, token } = config;
+
+    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(filePath)}`;
+
+    // Fetch current file to obtain SHA
+    const getRes = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github.v3+json',
+      },
+    });
+
+    if (!getRes.ok) {
+      if (getRes.status === 404) {
+        throw new Error('File not found');
+      }
+      throw new GithubAdapterRequestError(getRes);
+    }
+
+    const currentFile = (await getRes.json()) as { sha: string };
+
+    const delRes = await fetch(url, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github.v3+json',
+      },
+      body: JSON.stringify({
+        message: commitMessage ?? 'git-storage',
+        sha: currentFile.sha,
+      }),
+    });
+
+    if (!delRes.ok) {
+      throw new GithubAdapterRequestError(delRes);
+    }
+  };
+
+  return { read, write, delete: del };
 }
 
 export function GithubAdapter(config: GithubAdapterConfig): Adapter {

@@ -171,15 +171,12 @@ describe('file', () => {
     it('should write a new unique file', async () => {
       const filePath = `data/dynamic/${crypto.randomUUID()}.jpg` as const;
 
-      const adapter = GithubAdapter(BaseConfig);
+      const client = createClient(GithubAdapter(BaseConfig));
 
       const imagePath = path.join(__dirname, '..', '_images', 'cat.jpg');
       const imageBuffer = await fs.readFile(imagePath);
 
-      await adapter.file.write(imageBuffer, {
-        filePath: filePath as `${string}.json`, // TODO: Fix this
-        commitMessage: 'test: write unique file (image bytes)',
-      });
+      await client.writeFile({ filePath, commitMessage: 'test: write unique file (image bytes)' }, imageBuffer);
 
       // Verify content via GitHub API
       const { owner, repo, token } = BaseConfig;
@@ -204,24 +201,54 @@ describe('file', () => {
     it('should throw when writing to an existing path', async () => {
       const filePath = `data/dynamic/${crypto.randomUUID()}.jpg` as const;
 
-      const adapter = GithubAdapter(BaseConfig);
+      const client = createClient(GithubAdapter(BaseConfig));
 
       const imagePath = path.join(__dirname, '..', '_images', 'cat.jpg');
       const imageBuffer = await fs.readFile(imagePath);
 
-      await adapter.file.write(imageBuffer, {
-        filePath: filePath as `${string}.json`, // TODO: Fix this
-        commitMessage: 'test: write first (image bytes)',
-      });
+      await client.writeFile({ filePath, commitMessage: 'test: write first (image bytes)' }, imageBuffer);
 
       await expect(
-        adapter.file.write(imageBuffer, {
-          filePath: filePath as `${string}.json`, // TODO: Fix this
-          commitMessage: 'test: write duplicate (image bytes)',
-        }),
+        client.writeFile({ filePath, commitMessage: 'test: write duplicate (image bytes)' }, imageBuffer),
       ).rejects.toThrow('File already exists');
 
       await cleanupTestFile(filePath);
+    });
+  });
+
+  describe('delete', () => {
+    it('should delete an existing file', async () => {
+      const filePath = `data/dynamic/${crypto.randomUUID()}.jpg` as const;
+
+      const client = createClient(GithubAdapter(BaseConfig));
+
+      const imagePath = path.join(__dirname, '..', '_images', 'cat.jpg');
+      const imageBuffer = await fs.readFile(imagePath);
+
+      await client.writeFile({ filePath, commitMessage: 'test: setup file for delete' }, imageBuffer);
+
+      await client.deleteFile({ filePath, commitMessage: 'test: delete file' });
+
+      const { owner, repo, token } = BaseConfig;
+      const url = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`;
+      const res = await fetch(url, {
+        headers: {
+          Authorization: `token ${token}`,
+          Accept: 'application/vnd.github.v3+json',
+        },
+      });
+
+      expect(res.status).toBe(404);
+    });
+
+    it('should throw when deleting a non-existing file', async () => {
+      const filePath = `data/dynamic/${crypto.randomUUID()}.jpg` as const;
+
+      const client = createClient(GithubAdapter(BaseConfig));
+
+      await expect(client.deleteFile({ filePath, commitMessage: 'test: delete missing file' })).rejects.toThrow(
+        'File not found',
+      );
     });
   });
 });

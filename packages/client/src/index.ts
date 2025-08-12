@@ -1,4 +1,4 @@
-import type { Adapter, StorageOperationConfig } from '@git-storage/types';
+import type { Adapter, StorageOperationConfig, FileStorageOperationConfig } from '@git-storage/types';
 
 export * from '@git-storage/types';
 
@@ -82,6 +82,14 @@ export function createClient(adapter: Adapter) {
     return records.length;
   };
 
+  const writeFile = async <TContent>(config: FileStorageOperationConfig, content: TContent): Promise<void> => {
+    await adapter.file.write(content, config);
+  };
+
+  const deleteFile = async (config: FileStorageOperationConfig): Promise<void> => {
+    await adapter.file.delete(config);
+  };
+
   return {
     getAll,
     getById,
@@ -90,5 +98,7 @@ export function createClient(adapter: Adapter) {
     delete: delete_,
     exists,
     count,
+    writeFile,
+    deleteFile,
   };
 }
