@@ -11,7 +11,8 @@ A lightweight Node.js library that enables Git-based data storage by directly ma
 - **TypeScript First** - Full TypeScript support with type-safe operations
 - **CRUD Operations** - Create, read, update, delete, count, and exists operations
 - **Automatic Commits** - Changes are automatically committed and pushed to remote
-- **JSON Storage** - Simple JSON-based data storage with ID-based records
+- **Records Storage** - Simple JSON-based data storage with ID-based records
+- **Files Storage** - Simple file storage with commit messages
 
 ## Warning
 
