@@ -16,7 +16,7 @@
     "release:types": "cd packages/types && pnpm publish",
     "release:client": "cd packages/client && pnpm publish",
     "release:github-adapter": "cd packages/github-adapter && pnpm publish",
-    "release:all": "pnpm build:all && pnpm release:types && pnpm release:client && pnpm release:github-adapter"
+    "release:all": "pnpm build:all && pnpm test:integration && pnpm release:types && pnpm release:client && pnpm release:github-adapter"
   },
   "devDependencies": {
     "@eslint/js": "^9.26.0",
