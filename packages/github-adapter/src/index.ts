@@ -166,8 +166,39 @@ function filesAdapter(config: GithubAdapterConfig): Adapter['files'] {
     }
   };
 
-  const read = async <TContent>(): Promise<TContent> => {
-    throw new Error('Not implemented');
+  const read = async <TContent>({ filePath }: FilesOperationConfig): Promise<TContent> => {
+    const { owner, repo, token } = config;
+
+    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(filePath)}`;
+
+    const res = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github.v3+json',
+      },
+    });
+
+    if (!res.ok) {
+      if (res.status === 404) {
+        throw new Error('File not found');
+      }
+      throw new GithubAdapterRequestError(res);
+    }
+
+    let data: GitHubContentResponse;
+    try {
+      data = (await res.json()) as GitHubContentResponse;
+    } catch (cause) {
+      throw new GithubAdapterResponseError('Failed to parse response as JSON', res, cause as Error);
+    }
+
+    if (!data.content) {
+      throw new GithubAdapterResponseError('No content found in the response', res);
+    }
+
+    const decodedBuffer = Buffer.from(data.content, 'base64');
+
+    return decodedBuffer as unknown as TContent;
   };
 
   const del = async ({ filePath, commitMessage }: FilesOperationConfig): Promise<void> => {

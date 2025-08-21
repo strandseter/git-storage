@@ -87,6 +87,10 @@ export function createClient(adapter: Adapter) {
   } as const;
 
   const files = {
+    read: async <TContent>(config: FilesReadConfig): Promise<TContent> => {
+      return (await adapter.files.read<Buffer>(config)) as TContent;
+    },
+
     write: async <TContent>(config: FilesWriteConfig, content: TContent): Promise<void> => {
       await adapter.files.write(content, config);
     },

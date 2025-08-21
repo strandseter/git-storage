@@ -173,6 +173,52 @@ describe('records', () => {
 });
 
 describe('file', () => {
+  describe('read', () => {
+    it('should read an existing file', async () => {
+      const filePath = `data/dynamic/${crypto.randomUUID()}.jpg` as const;
+
+      const client = createClient(GithubAdapter(BaseConfig));
+
+      const imagePath = path.join(__dirname, '..', '_images', 'cat.jpg');
+      const imageBuffer = await fs.readFile(imagePath);
+
+      await client.files.write({ filePath, commitMessage: 'files/setup file for read' }, imageBuffer);
+
+      const readContent = await client.files.read<Buffer>({ filePath });
+
+      expect(Buffer.isBuffer(readContent)).toBe(true);
+      expect((readContent as Buffer).equals(imageBuffer)).toBe(true);
+
+      await cleanupTestFile(filePath);
+    });
+
+    it('should read a text file as buffer and convert to string', async () => {
+      const filePath = `data/dynamic/${crypto.randomUUID()}.txt` as const;
+      const textContent = 'Hello, World! This is a test file.';
+
+      const client = createClient(GithubAdapter(BaseConfig));
+
+      await client.files.write({ filePath, commitMessage: 'files/setup text file for read' }, textContent);
+
+      const readBuffer = await client.files.read<Buffer>({ filePath });
+
+      expect(Buffer.isBuffer(readBuffer)).toBe(true);
+
+      const readContent = readBuffer.toString('utf-8');
+      expect(readContent).toBe(textContent);
+
+      await cleanupTestFile(filePath);
+    });
+
+    it('should throw when reading a non-existing file', async () => {
+      const filePath = `data/dynamic/${crypto.randomUUID()}.txt` as const;
+
+      const client = createClient(GithubAdapter(BaseConfig));
+
+      await expect(client.files.read<string>({ filePath })).rejects.toThrow();
+    });
+  });
+
   describe('write', () => {
     it('should write a new unique file', async () => {
       const filePath = `data/dynamic/${crypto.randomUUID()}.jpg` as const;
